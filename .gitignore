@@ -49,3 +49,5 @@ Temporary Items
 .idea
 out\
 .class
+*.class
+Projecto de BD.iml
