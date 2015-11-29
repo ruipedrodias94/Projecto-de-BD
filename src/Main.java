@@ -30,11 +30,14 @@ public class Main {
         //login = dataBase.login("ruipedrodias", "12345");
 
         //Get id_Cliente
-        //id_Cliente = dataBase.getIdCliente("ruipedrodias");
-        //System.out.println(id_Cliente);
+        id_Cliente = dataBase.getIdCliente("ruipedrodias");
+        System.out.println(id_Cliente);
 
         //Listar os projectos, temos de ter uma variavel para o estado  activo --- 1 inactivo -- 0;
-        //projectos = dataBase.listarProjectos(1);
+        projectos = dataBase.listarProjectos(1);
+        for (int i = 0; i< projectos.size();i++){
+            System.out.println(projectos.get(i));
+        }
 
         //Consultar saldo
         //saldo = dataBase.consultarSaldo(1);
@@ -56,5 +59,7 @@ public class Main {
 
         //detalhes = dataBase.listarDetalhes_Projecto(1);
         //System.out.println(detalhes);
+
+        dataBase.fazerDoacao(4, 400, id_Cliente);
     }
 }
