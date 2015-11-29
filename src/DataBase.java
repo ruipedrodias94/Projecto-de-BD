@@ -1,5 +1,8 @@
+import jdk.internal.util.xml.impl.Input;
+
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * Created by Rui Dias on 27/11/2015.
@@ -59,6 +62,21 @@ public class DataBase {
         try{
             statement = connection.createStatement();
             resultSet = statement.executeQuery("SELECT * FROM proj_bd.cliente WHERE user_Name = '" + username + "';");
+            while (resultSet.next()){
+                id = resultSet.getInt(1);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    //Get o id do projecto
+    public synchronized int getIdProjeto(String nomeProjecto) throws SQLException{
+        int id = 0;
+        try{
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("SELECT * FROM proj_bd.projecto WHERE nome_Projecto = '" + nomeProjecto + "';");
             while (resultSet.next()){
                 id = resultSet.getInt(1);
             }
@@ -142,7 +160,6 @@ public class DataBase {
 
     //Consultar o saldo
     public synchronized int consultarSaldo(int id_Cliente) throws SQLException{
-
         int saldo_Cliente = 0;
         try{
             statement = connection.createStatement();
@@ -167,6 +184,13 @@ public class DataBase {
         //id_Cliente ---> Tambem ainda nao sei como meter
         //A data vai ter que ser do tipo 20151030  ---> 30-10-2015 Passamos como string, e no menu pede-se o dia o mes e o ano, tornando dempois numa string
 
+        //Variaveis de pixota
+        int quantidade = 0;
+        int montante = 0;
+        String descricao = "";
+        int id_Projecto = 0;
+
+        Scanner sc = new Scanner(System.in);
 
         try{
             preparedStatement = connection.prepareStatement("INSERT INTO proj_bd.projecto (nome_Projecto, descricao_Projecto, estado, data_Limite," +
@@ -183,9 +207,45 @@ public class DataBase {
 
             preparedStatement.executeUpdate();
 
-            System.out.println("PROJECTO CRIADO COM SUSEXO");
+            System.out.println("PROJECTO CRIADO COM SUCESSO");
 
         }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+
+        id_Projecto = getIdProjeto(nome_Projecto);
+
+        System.out.println("QUANTAS RECOMPENSAS DESEJA CRIAR?");
+        quantidade = sc.nextInt();
+        sc.nextLine();
+        while (quantidade > 0){
+            System.out.println("DESCRICAO DA RECOMPENSA: ");
+            descricao = sc.nextLine();
+            System.out.println("MONTANTE A PARTIR DO QUAL O CLIENTE RECEBER A RECOMPENSA: ");
+            montante = sc.nextInt();
+            sc.nextLine();
+            criarRecompensa(descricao, montante, id_Projecto);
+            quantidade--;
+        }
+
+    }
+
+    //Criar uma recompensa
+    public synchronized void criarRecompensa(String descricao, int montante, int id_Projecto) throws SQLException{
+        try {
+
+            preparedStatement = connection.prepareStatement(" INSERT INTO proj_bd.recompensa (descricao_Recompensa,montante_Recompensa, Projecto_idProjecto)" +
+            "VALUES (?,?,?);");
+
+            preparedStatement.setString(1, descricao);
+            preparedStatement.setInt(2,montante);
+            preparedStatement.setInt(3, id_Projecto);
+
+            preparedStatement.executeUpdate();
+
+            System.out.println("RECOMPENSA CRIADA COM SUCESSO");
+
+        } catch (SQLException e) {
             System.out.println(e.getLocalizedMessage());
         }
     }
@@ -199,7 +259,7 @@ public class DataBase {
 
         try{
             statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT nome_Projecto, descricao_Projecto, data_Limite, dinheiro_Angariado, dinheiro_Limite" +
+            resultSet = statement.executeQuery(" SELECT nome_Projecto, descricao_Projecto, data_Limite, dinheiro_Angariado, dinheiro_Limite" +
                     " FROM proj_bd.projecto WHERE idProjecto= " + id_Projecto + ";");
             if(resultSet.next()){
                 nome_Projecto = resultSet.getString(1);
@@ -222,7 +282,33 @@ public class DataBase {
         }
 
         return string_Final;
+    }
 
+    //Inacabada
+    //Fazer doação ao projecto
+    public synchronized void fazerDoacao(int id_Projecto, int valor, int id_Cliente) throws SQLException {
+        int valor_Cliente, valor_Projecto;
+
+        valor_Cliente = consultarSaldo(id_Cliente);
+        if(valor_Cliente > valor){
+            //Continua
+        }else{
+            System.out.println("NAO TEM DINHEIRO SUFICIENTE");
+        }
+
+    }
+
+    //Faz update do saldo cliente
+    public synchronized void updateSaldoCliente(int id_Cliente, int novoSaldo) throws SQLException{
+
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(" UPDATE proj_bd.cliente SET saldo = "+novoSaldo+" WHERE idCliente = "+id_Cliente+";");
+
+
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
     }
 
 }

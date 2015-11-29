@@ -41,7 +41,7 @@ public class Main {
         //System.out.print(saldo);
 
         //Criar projecto
-        //dataBase.criarProjecto("Primeiro","Isto é um teste", "2015-11-27", 1, 10000);
+        //dataBase.criarProjecto("Primeiro","Isto é um teste", "2015-11-27", id_Cliente, 10000);
 
         /*String a = "2015-11-27";
         String b = "2015-11-28";
