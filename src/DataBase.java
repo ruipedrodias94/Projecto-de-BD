@@ -278,7 +278,7 @@ public class DataBase {
         try {
 
             preparedStatement = connection.prepareStatement(" INSERT INTO proj_bd.recompensa (descricao_Recompensa,montante_Recompensa, Projecto_idProjecto)" +
-            "VALUES (?,?,?);");
+                    "VALUES (?,?,?);");
 
             preparedStatement.setString(1, descricao);
             preparedStatement.setInt(2,montante);
@@ -332,8 +332,8 @@ public class DataBase {
     public synchronized void fazerDoacao(int id_Projecto, int valor, int id_Cliente) throws SQLException {
         int valor_Cliente, valor_Projecto;
         ArrayList<String> recompensas = getRecompensas(valor, id_Projecto);
-        int id_Recompensa = 0;
-        int id_Voto = 1;
+        int id_Recompensa;
+        int id_Voto = 0;
 
         valor_Cliente = consultarSaldo(id_Cliente);
         valor_Projecto = consultarSaldoProjecto(id_Projecto);
@@ -360,6 +360,8 @@ public class DataBase {
             //Recalcula o valor do Projecto e faz o update
             valor_Projecto = valor_Projecto + valor;
             updateSaldoProjecto(id_Projecto, valor_Projecto);
+
+            id_Voto = getIdVoto();
 
             //Cria a doaçao
             criarDoacao(valor, id_Recompensa, id_Voto, id_Cliente, id_Projecto);
@@ -457,5 +459,70 @@ public class DataBase {
         } catch (SQLException e) {
             System.out.println(e.getLocalizedMessage());
         }
+    }
+
+
+    //Função para ver o id do voto
+    public synchronized int getIdVoto(){
+        int id_Voto = 0;
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(" SELECT idVoto" + " FROM proj_bd.voto ;");
+            while (resultSet.next()){
+                id_Voto += 1;
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return id_Voto;
+    }
+
+    //Cancelar projecto
+    public synchronized void cancelarProjecto(int id_Projecto) throws SQLException {
+        ArrayList<String> doacoes = getDoacoes(id_Projecto);
+        String[] parts;
+        int saldo_Cliente = 0;
+        try {
+            preparedStatement = connection.prepareStatement(" UPDATE proj_bd.projecto SET estado = 0 WHERE idProjecto = "+id_Projecto+";");
+            preparedStatement.executeUpdate();
+
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+
+        for (int i = 0; i< doacoes.size(); i++){
+            parts = doacoes.get(i).split("-");
+            System.out.print(parts[0] + " " + parts[1]);
+            saldo_Cliente = consultarSaldo(Integer.parseInt(parts[0]));
+            saldo_Cliente += Integer.parseInt(parts[1]);
+            updateSaldoCliente(Integer.parseInt(parts[0]), saldo_Cliente);
+        }
+
+        System.out.println("PROJECTO FOI CANCELADO\nSALDO DO CLIENTE FOI RESTAURADO, OBRIGADO");
+
+    }
+
+    //Get doacoes
+    public synchronized ArrayList<String> getDoacoes(int id_Projecto){
+        ArrayList<String> doacoes = new ArrayList<>();
+        String doacao = "";
+        int montante, id_Cliente;
+
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(" SELECT  Cliente_idCliente, montante" + " FROM proj_bd.doacao" +
+                    " WHERE Projecto_idProjecto = "+id_Projecto + ";");
+            while (resultSet.next()){
+                id_Cliente = resultSet.getInt(1);
+                montante = resultSet.getInt(2);
+
+                doacao = String.valueOf(id_Cliente) + "-" +String.valueOf(montante) ;
+                doacoes.add(doacao);
+            }
+
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return doacoes;
     }
 }

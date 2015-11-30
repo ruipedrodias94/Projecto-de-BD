@@ -44,7 +44,7 @@ public class Main {
         //System.out.print(saldo);
 
         //Criar projecto
-        //dataBase.criarProjecto("Primeiro","Isto é um teste", "2015-11-27", id_Cliente, 10000);
+        //dataBase.criarProjecto("Segundo","Isto é um segundo teste", "2015-11-27", id_Cliente, 10000);
 
         /*String a = "2015-11-27";
         String b = "2015-11-28";
@@ -60,6 +60,10 @@ public class Main {
         //detalhes = dataBase.listarDetalhes_Projecto(1);
         //System.out.println(detalhes);
 
-        dataBase.fazerDoacao(4, 400, id_Cliente);
+        //Fazer doacao
+        //dataBase.fazerDoacao(5, 10, id_Cliente);
+
+        //Cancelar projecto
+        dataBase.cancelarProjecto(4);
     }
 }
