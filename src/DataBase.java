@@ -1,8 +1,7 @@
-import jdk.internal.util.xml.impl.Input;
-
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.sql.Date;
+import java.util.*;
+
 
 /**
  * Created by Rui Dias on 27/11/2015.
@@ -135,46 +134,47 @@ public class DataBase {
 
     //Ver se o projecto ja existe
     public synchronized boolean projectExists(String nome_Projecto) throws SQLException{
-        try{
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM proj_bd.projecto WHERE projecto.nome_Projecto = '" + nome_Projecto +"';");
-            while (resultSet.next()){
+        ArrayList<Projecto> projectosAux = getProjectos();
+        for (int i = 0; i < projectosAux.size(); i++){
+            if(projectosAux.get(i).getNome_Projecto().equals(nome_Projecto)){
                 return true;
             }
-        }catch (SQLException e){
-            System.out.println(e.getLocalizedMessage());
         }
         return false;
     }
 
-    //Listar projectos actuais
-    public synchronized ArrayList<String> listarProjectos(int state) throws SQLException{
-        ArrayList<String> projectos_Actuais = new ArrayList<>();
-        String nome_Projecto, data_Final, estado = "";
-        String string_Final = "";
-        int id_Projecto = 0;
+    //GET PROJECTOS CARALHO
+    public synchronized ArrayList<Projecto> getProjectos(){
+        ArrayList<Projecto> aux = new ArrayList<>();
+        Projecto projectoAux;
         try {
             statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT nome_Projecto, data_Limite, idProjecto FROM proj_bd.projecto" +
-                    " WHERE projecto.estado ="+ state +";");
-            while (resultSet.next()){
-                nome_Projecto = resultSet.getString(1);
-                data_Final = resultSet.getString(2);
-                id_Projecto = resultSet.getInt(3);
-                if(state == 1) {
-                    estado = "ACTIVO";
-                } else {
-                    estado = "INACTIVO";
-                }
-                string_Final = "NOME DO PROJECTO: " + nome_Projecto +"\nID DO PROJECTO: "+ String.valueOf(id_Projecto) +"\nDATA LIMITE: " + data_Final +
-                        "\nESTADO: " + estado + "\n====================================================";
+            resultSet = statement.executeQuery("SELECT idProjecto, nome_Projecto, descricao_Projecto, estado, data_Limite, dinheiro_Angariado, dinheiro_Limite, Cliente_idCliente" +
+                    " FROM proj_bd.projecto;");
 
-                projectos_Actuais.add(string_Final);
+            while (resultSet.next()){
+                projectoAux = new Projecto(resultSet.getInt(1),resultSet.getString(2), resultSet.getString(3), resultSet.getInt(4), resultSet.getDate(5), resultSet.getInt(6),
+                        resultSet.getInt(7), resultSet.getInt(8));
+
+                aux.add(projectoAux);
             }
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
         }
+        return aux;
+    }
 
+    //Listar projectos actuais ou acabados, basta mudar o atributo
+    public synchronized ArrayList<String> listarProjectos(int state) throws SQLException{
+        ArrayList<String> projectos_Actuais = new ArrayList<>();
+        ArrayList<Projecto> projectosAux = getProjectos();
+        String proj = "";
+        for (int i = 0; i<projectosAux.size(); i++){
+            if (projectosAux.get(i).getEstado() == state){
+                proj = "ID: " + projectosAux.get(i).getId_Projecto() + "  -----<> " + projectosAux.get(i).getNome_Projecto();
+                projectos_Actuais.add(proj);
+            }
+        }
         return projectos_Actuais;
     }
 
@@ -184,7 +184,6 @@ public class DataBase {
         try{
             statement = connection.createStatement();
             resultSet = statement.executeQuery("SELECT saldo FROM proj_bd.cliente WHERE idCliente =" + id_Cliente+";");
-
             while (resultSet.next()){
                 saldo_Cliente = resultSet.getInt(1);
             }
@@ -197,15 +196,11 @@ public class DataBase {
     //Consultar o saldo projecto
     public synchronized int consultarSaldoProjecto(int id_Projecto) throws SQLException{
         int saldo_Projecto = 0;
-        try{
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT dinheiro_Angariado FROM proj_bd.projecto WHERE idProjecto =" + id_Projecto+";");
-
-            while (resultSet.next()){
-                saldo_Projecto = resultSet.getInt(1);
+        ArrayList<Projecto> aux = getProjectos();
+        for (int i = 0; i < aux.size(); i++){
+            if(aux.get(i).getId_Projecto() == id_Projecto){
+                saldo_Projecto = aux.get(i).getDinheiro_Angariado();
             }
-        }catch (SQLException e){
-            System.out.println(e.getLocalizedMessage());
         }
         return saldo_Projecto;
     }
@@ -230,7 +225,6 @@ public class DataBase {
             System.out.println("JA EXISTE UM PROJECTO COM ESSE NOME, POR FAVOR ESCOLHA OUTRO!");
             return;
         }
-
         try{
             preparedStatement = connection.prepareStatement("INSERT INTO proj_bd.projecto (nome_Projecto, descricao_Projecto, estado, data_Limite," +
                     " dinheiro_Angariado, dinheiro_Limite, Cliente_idCliente) " +
@@ -276,7 +270,6 @@ public class DataBase {
     //Criar uma recompensa
     public synchronized void criarRecompensa(String descricao, int montante, int id_Projecto) throws SQLException{
         try {
-
             preparedStatement = connection.prepareStatement(" INSERT INTO proj_bd.recompensa (descricao_Recompensa,montante_Recompensa, Projecto_idProjecto)" +
                     "VALUES (?,?,?);");
 
@@ -296,34 +289,18 @@ public class DataBase {
 
     //Listar detalhes do projecto
     public synchronized String listarDetalhes_Projecto(int id_Projecto) throws SQLException{
-        String string_Final = "", nome_Projecto = "", descricao_Projecto= "";
-        int dinheiro_Angariado = 0, dinheiro_Limite = 0;
-        Date data_Limite = null;
-
-        try{
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(" SELECT nome_Projecto, descricao_Projecto, data_Limite, dinheiro_Angariado, dinheiro_Limite" +
-                    " FROM proj_bd.projecto WHERE idProjecto= " + id_Projecto + ";");
-            if(resultSet.next()){
-                nome_Projecto = resultSet.getString(1);
-                descricao_Projecto = resultSet.getString(2);
-                data_Limite = resultSet.getDate(3);
-                dinheiro_Angariado = resultSet.getInt(4);
-                dinheiro_Limite = resultSet.getInt(5);
-
+        String string_Final = "";
+        ArrayList<Projecto> projectosAux = getProjectos();
+        for (int i = 0; i < projectosAux.size(); i++){
+            if(projectosAux.get(i).getId_Projecto() == id_Projecto){
                 string_Final = "DETALHES DO PROJECTO: \n"
-                        + "NOME: " + nome_Projecto + "\n"
-                        + "DESCRICAO: " + descricao_Projecto + "\n"
-                        + "DATA LIMITE: " + String.valueOf(data_Limite) + "\n"
-                        + "DINHEIRO ANGARIADO: " + String.valueOf(dinheiro_Angariado) + "\n"
-                        + "DINHEIRO NECESSARIO: " + String.valueOf(dinheiro_Limite)
-                        + "\n====================================================";
-
-            }
-        }catch (SQLException e){
-            System.out.println(e.getLocalizedMessage());
+                        + "NOME: " + projectosAux.get(i).getNome_Projecto() + "\n"
+                        + "DESCRICAO: " + projectosAux.get(i).getDescricao_Projecto() + "\n"
+                        + "DATA LIMITE: " + String.valueOf(projectosAux.get(i).getData_Limite()) + "\n"
+                        + "DINHEIRO ANGARIADO: " + String.valueOf(projectosAux.get(i).getDinheiro_Angariado()) + "\n"
+                        + "DINHEIRO NECESSARIO: " + String.valueOf(projectosAux.get(i).getDinheiro_Limite())
+                        + "\n====================================================";            }
         }
-
         return string_Final;
     }
 
@@ -331,7 +308,7 @@ public class DataBase {
     //Fazer doação ao projecto
     public synchronized void fazerDoacao(int id_Projecto, int valor, int id_Cliente) throws SQLException {
         int valor_Cliente, valor_Projecto;
-        ArrayList<String> recompensas = getRecompensas(valor, id_Projecto);
+        ArrayList<Recompensa> recompensas = getRecompensas(id_Projecto);
         int id_Recompensa;
         int id_Voto = 0;
 
@@ -345,7 +322,9 @@ public class DataBase {
 
             //Imprime as recompensas
             for (int i = 0; i<recompensas.size(); i++ ){
-                System.out.println(recompensas.get(i));
+                if (recompensas.get(i).getMontante_Recompensa() <= valor) {
+                    System.out.println("ID RECOMPENSA: " + String.valueOf(recompensas.get(i).getId_Recompensa())+ " -------<>  " + recompensas.get(i).getDescricao_Recompensa());
+                }
             }
 
             System.out.println("EM QUE RECOMPENSA VAI VOTAR?");
@@ -399,27 +378,22 @@ public class DataBase {
     }
 
     //Listar as recompensas de acordo com o valor
-    public synchronized ArrayList<String> getRecompensas(int valor, int id_Projecto) throws SQLException{
-        ArrayList<String> recompensas = new ArrayList<>();
-        String recompensa = "";
-        int id = 0;
-
-        String descricao = "";
+    public synchronized ArrayList<Recompensa> getRecompensas(int id_Projecto) throws SQLException{
+        ArrayList<Recompensa> recompensasAux = new ArrayList<>();
+        Recompensa recompensa;
         try {
             statement = connection.createStatement();
-            resultSet = statement.executeQuery(" SELECT idRecompensa, descricao_Recompensa" +
-                    " FROM proj_bd.recompensa WHERE Projecto_idProjecto= " + id_Projecto + " AND montante_Recompensa <= "+ valor +" ;");
+            resultSet = statement.executeQuery(" SELECT idRecompensa, descricao_Recompensa, montante_Recompensa, Projecto_idProjecto" +
+                    " FROM proj_bd.recompensa WHERE Projecto_idProjecto= " + id_Projecto + " ;");
 
             while (resultSet.next()){
-                id = resultSet.getInt(1);
-                descricao = resultSet.getString(2);
-                recompensa = "ID DA RECOMPENSA: " + String.valueOf(id) + "    DESCRICAO: " + descricao;
-                recompensas.add(recompensa);
+                recompensa = new Recompensa(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4));
+                recompensasAux.add(recompensa);
             }
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
         }
-        return recompensas;
+        return recompensasAux;
     }
 
     //Criar voto
@@ -440,7 +414,7 @@ public class DataBase {
         }
     }
 
-    //Criar
+    //Criar doacao
     public synchronized void criarDoacao(int montante, int id_Recompensa,int id_Voto, int id_Cliente,  int id_Projecto) throws SQLException{
         try {
 
@@ -461,7 +435,6 @@ public class DataBase {
         }
     }
 
-
     //Função para ver o id do voto
     public synchronized int getIdVoto(){
         int id_Voto = 0;
@@ -478,8 +451,9 @@ public class DataBase {
     }
 
     //Cancelar projecto
+    //TODO mudar o arraylist de doaçoes
     public synchronized void cancelarProjecto(int id_Projecto) throws SQLException {
-        ArrayList<String> doacoes = getDoacoes(id_Projecto);
+        ArrayList<Doacao> doacoes = getDoacoes(id_Projecto);
         String[] parts;
         int saldo_Cliente = 0;
         try {
@@ -491,38 +465,46 @@ public class DataBase {
         }
 
         for (int i = 0; i< doacoes.size(); i++){
-            parts = doacoes.get(i).split("-");
-            System.out.print(parts[0] + " " + parts[1]);
-            saldo_Cliente = consultarSaldo(Integer.parseInt(parts[0]));
-            saldo_Cliente += Integer.parseInt(parts[1]);
-            updateSaldoCliente(Integer.parseInt(parts[0]), saldo_Cliente);
+            saldo_Cliente = consultarSaldo(doacoes.get(i).getCliente_idCliente());
+            saldo_Cliente += doacoes.get(i).getMontante();
+            updateSaldoCliente(doacoes.get(i).getCliente_idCliente() , saldo_Cliente);
         }
 
         System.out.println("PROJECTO FOI CANCELADO\nSALDO DO CLIENTE FOI RESTAURADO, OBRIGADO");
-
     }
 
     //Get doacoes
-    public synchronized ArrayList<String> getDoacoes(int id_Projecto){
-        ArrayList<String> doacoes = new ArrayList<>();
-        String doacao = "";
-        int montante, id_Cliente;
-
+    public synchronized ArrayList<Doacao> getDoacoes(int id_Projecto){
+        ArrayList<Doacao> doacoesAux = new ArrayList<>();
+        Doacao doacaoAux;
         try {
             statement = connection.createStatement();
-            resultSet = statement.executeQuery(" SELECT  Cliente_idCliente, montante" + " FROM proj_bd.doacao" +
-                    " WHERE Projecto_idProjecto = "+id_Projecto + ";");
+            resultSet = statement.executeQuery(" SELECT  idDoacao, montante, Recompensa_idRecompensa, Voto_idVoto, Cliente_idCliente, Projecto_idProjecto" +
+                    " FROM proj_bd.doacao WHERE Projecto_idProjecto = "+id_Projecto + ";");
             while (resultSet.next()){
-                id_Cliente = resultSet.getInt(1);
-                montante = resultSet.getInt(2);
-
-                doacao = String.valueOf(id_Cliente) + "-" +String.valueOf(montante) ;
-                doacoes.add(doacao);
+                doacaoAux = new Doacao(resultSet.getInt(1),resultSet.getInt(2),resultSet.getInt(3),resultSet.getInt(4),resultSet.getInt(5),resultSet.getInt(6));
+                doacoesAux.add(doacaoAux);
             }
-
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
         }
-        return doacoes;
+        return doacoesAux;
     }
+
+    //Finalizar projecto
+    //Verificar data, e o dinheiro limite, se foi bem sucedido tudo bem, senao faz o cancelar projecto xD
+    /*public synchronized void finalizarProjectos() throws SQLException {
+        ArrayList<String> projectos = listarProjectos(1);
+        ArrayList<String> ids = new ArrayList<>();
+        Date data_Projecto;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        java.util.Date date = new Date();
+
+        for (int i = 0; i<projectos.size(); i++){
+
+        }
+
+
+    }*/
 }

@@ -34,14 +34,14 @@ public class Main {
         System.out.println(id_Cliente);
 
         //Listar os projectos, temos de ter uma variavel para o estado  activo --- 1 inactivo -- 0;
-        projectos = dataBase.listarProjectos(1);
+        projectos = dataBase.listarProjectos(0);
         for (int i = 0; i< projectos.size();i++){
             System.out.println(projectos.get(i));
         }
 
         //Consultar saldo
-        //saldo = dataBase.consultarSaldo(1);
-        //System.out.print(saldo);
+        saldo = dataBase.consultarSaldoProjecto(5);
+        System.out.print(saldo);
 
         //Criar projecto
         //dataBase.criarProjecto("Segundo","Isto é um segundo teste", "2015-11-27", id_Cliente, 10000);
@@ -57,13 +57,13 @@ public class Main {
             System.out.println("A data dois e mais velha que a um");
         }*/
 
-        //detalhes = dataBase.listarDetalhes_Projecto(1);
-        //System.out.println(detalhes);
+        detalhes = dataBase.listarDetalhes_Projecto(4);
+        System.out.println(detalhes);
 
         //Fazer doacao
         //dataBase.fazerDoacao(5, 10, id_Cliente);
 
         //Cancelar projecto
-        dataBase.cancelarProjecto(4);
+        //dataBase.cancelarProjecto(4);
     }
 }
