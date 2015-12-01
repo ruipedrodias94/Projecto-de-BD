@@ -65,5 +65,8 @@ public class Main {
 
         //Cancelar projecto
         //dataBase.cancelarProjecto(4);
+
+        //Finalizar projectos
+        dataBase.finalizarProjectos();
     }
 }

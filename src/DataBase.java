@@ -1,6 +1,7 @@
 import java.sql.*;
-import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 
 /**
@@ -150,7 +151,7 @@ public class DataBase {
         try {
             statement = connection.createStatement();
             resultSet = statement.executeQuery("SELECT idProjecto, nome_Projecto, descricao_Projecto, estado, data_Limite, dinheiro_Angariado, dinheiro_Limite, Cliente_idCliente" +
-                    " FROM proj_bd.projecto;");
+                    " FROM proj_bd.projecto WHERE estado = 1;");
 
             while (resultSet.next()){
                 projectoAux = new Projecto(resultSet.getInt(1),resultSet.getString(2), resultSet.getString(3), resultSet.getInt(4), resultSet.getDate(5), resultSet.getInt(6),
@@ -233,7 +234,7 @@ public class DataBase {
             preparedStatement.setString(1,nome_Projecto);
             preparedStatement.setString(2,desricao_Projecto);
             preparedStatement.setInt(3, 1);
-            preparedStatement.setDate(4, Date.valueOf(data));
+            preparedStatement.setDate(4, java.sql.Date.valueOf(data));
             preparedStatement.setInt(5, 0);
             preparedStatement.setInt(6,dinheiro_Limite);
             preparedStatement.setInt(7, id_Cliente);
@@ -451,10 +452,8 @@ public class DataBase {
     }
 
     //Cancelar projecto
-    //TODO mudar o arraylist de doaçoes
     public synchronized void cancelarProjecto(int id_Projecto) throws SQLException {
         ArrayList<Doacao> doacoes = getDoacoes(id_Projecto);
-        String[] parts;
         int saldo_Cliente = 0;
         try {
             preparedStatement = connection.prepareStatement(" UPDATE proj_bd.projecto SET estado = 0 WHERE idProjecto = "+id_Projecto+";");
@@ -493,18 +492,28 @@ public class DataBase {
 
     //Finalizar projecto
     //Verificar data, e o dinheiro limite, se foi bem sucedido tudo bem, senao faz o cancelar projecto xD
-    /*public synchronized void finalizarProjectos() throws SQLException {
-        ArrayList<String> projectos = listarProjectos(1);
-        ArrayList<String> ids = new ArrayList<>();
-        Date data_Projecto;
-
+    public synchronized void finalizarProjectos() throws SQLException {
+        ArrayList<Projecto> projectos = getProjectos();
+        ArrayList<Integer> naoCumpriram = new ArrayList<>();
+        Date data_Actual = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        java.util.Date date = new Date();
+        sdf.format(data_Actual);
+        int dinheiro_Actual, dinheiro_Limite;
 
         for (int i = 0; i<projectos.size(); i++){
-
+            Date data_Projecto = projectos.get(i).getData_Limite();
+            dinheiro_Actual = projectos.get(i).getDinheiro_Angariado();
+            dinheiro_Limite = projectos.get(i).getDinheiro_Limite();
+            if(data_Projecto.before(data_Actual)){
+                if(dinheiro_Actual<dinheiro_Limite){
+                    naoCumpriram.add(projectos.get(i).getId_Projecto());
+                }
+            }
         }
 
+        for (int i = 0; i< naoCumpriram.size(); i++){
+            cancelarProjecto(naoCumpriram.get(i));
+        }
 
-    }*/
+    }
 }
