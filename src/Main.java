@@ -68,5 +68,7 @@ public class Main {
 
         //Finalizar projectos
         dataBase.finalizarProjectos();
+
+        //Mudei esta linha aqui
     }
 }
