@@ -26,7 +26,7 @@ public class Main {
 
 
         //TODO Carregar configuracoes de ficheiro
-        int port = 6000;
+        int port = 7000;
         try{
             //Esta vai ser a nossa interface!
             DataBase dataBase = new DataBase();

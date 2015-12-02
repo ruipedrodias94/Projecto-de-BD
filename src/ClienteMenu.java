@@ -128,7 +128,7 @@ public class ClienteMenu {
 
  class LigacaoTCP{
      String hostname = "localhost";
-     int port = 6000;
+     int port = 7000;
      Socket s;
 
      public void ligaCliente() {
