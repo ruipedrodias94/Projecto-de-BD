@@ -362,6 +362,7 @@ public class DataBase {
     public synchronized void updateSaldoCliente(int id_Cliente, int novoSaldo) throws SQLException{
 
         try {
+            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(" UPDATE proj_bd.cliente SET saldo = "+novoSaldo+" WHERE idCliente = "+id_Cliente+";");
             preparedStatement.executeUpdate();
 
@@ -420,9 +421,12 @@ public class DataBase {
     }
 
     //Criar doacao
+    //Exemplo 1
+    //TODO PEDIR OPINIÃO AO PROFESSOR DE QUAL A MELHOR METODOLOGIA A USAR
     public synchronized void criarDoacao(int montante, int id_Recompensa,int id_Voto, int id_Cliente,  int id_Projecto) throws SQLException{
         try {
 
+            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(" INSERT INTO proj_bd.doacao (montante,Recompensa_idRecompensa,Voto_idVoto , Cliente_idCliente,Projecto_idProjecto)" +
                     "VALUES (?,?,?,?,?);");
             preparedStatement.setInt(1, montante);
@@ -433,11 +437,34 @@ public class DataBase {
 
             preparedStatement.executeUpdate();
 
-            System.out.println("DOACAO EFECTUADA COM SUCESSO");
-
+            boolean ok = askUserTransaction();
+            if(ok){
+                connection.commit();
+                connection.setAutoCommit(true);
+                System.out.println("DOACAO EFECTUADA COM SUCESSO");
+            }
         } catch (SQLException e) {
             System.out.println(e.getLocalizedMessage());
+            try{
+                //Ou este
+                connection.rollback();
+                //Ou este
+                preparedStatement = connection.prepareStatement("ROLLBACK ");
+                //TODO PERGUNTAR AO PROFESSOR NESTA PARTE
+            }catch (SQLException e1){
+                //Ignore
+            }
         }
+
+    }
+
+    public boolean askUserTransaction(){
+        System.out.println("QUER FINALIZAR ESTA TRANSAÇÃO?  -----<> S/N");
+        String decisao = sc.nextLine();
+        if(decisao.matches("S")){
+            return true;
+        }
+        return false;
     }
 
     //Função para ver o id do voto
