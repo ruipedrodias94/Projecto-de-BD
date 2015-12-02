@@ -1,3 +1,6 @@
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -17,31 +20,51 @@ public class Main {
         ArrayList<String> projectos = new ArrayList<>();
         int saldo = 0;
         String detalhes = "";
+        int numero_thread = 0;
 
 
-        //Esta vai ser a nossa interface!
-        DataBase dataBase = new DataBase();
 
+
+        //TODO Carregar configuracoes de ficheiro
+        int port = 6000;
+        try{
+            //Esta vai ser a nossa interface!
+            DataBase dataBase = new DataBase();
+            ServerSocket ss = new ServerSocket(port);
+            System.out.println("Escuta no porto 6000");
+            //Fica a escuta e cria uma nova thread para cada cliente que se ligue
+            while(true) {
+                Socket s = ss.accept();
+                System.out.println("ServerSocket Created: " + ss);
+                new Connection(s,numero_thread,dataBase);
+                numero_thread++;
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         //Registar Cliente
-        //dataBase.registarConta("Rui Pedro", "ruipedrodias", "12345", 10000);
+        //dataBase.registarConta("Jorjao", "jorgearauj", "12345", 10000);
 
         //Login
         //login = dataBase.login("ruipedrodias", "12345");
 
         //Get id_Cliente
-        id_Cliente = dataBase.getIdCliente("ruipedrodias");
-        System.out.println(id_Cliente);
+        //id_Cliente = dataBase.getIdCliente("jorgearauj");
+        //System.out.println(id_Cliente);
 
         //Listar os projectos, temos de ter uma variavel para o estado  activo --- 1 inactivo -- 0;
-        projectos = dataBase.listarProjectos(0);
-        for (int i = 0; i< projectos.size();i++){
+        //projectos = dataBase.listarProjectos(0);
+        /*for (int i = 0; i< projectos.size();i++){
             System.out.println(projectos.get(i));
-        }
+
+        }*/
 
         //Consultar saldo
-        saldo = dataBase.consultarSaldoProjecto(5);
-        System.out.print(saldo);
+        //saldo = dataBase.consultarSaldoProjecto(5);
+        //System.out.print(saldo);
 
         //Criar projecto
         //dataBase.criarProjecto("Segundo","Isto é um segundo teste", "2015-11-27", id_Cliente, 10000);
@@ -57,8 +80,8 @@ public class Main {
             System.out.println("A data dois e mais velha que a um");
         }*/
 
-        detalhes = dataBase.listarDetalhes_Projecto(4);
-        System.out.println(detalhes);
+        //detalhes = dataBase.listarDetalhes_Projecto(4);
+        //System.out.println(detalhes);
 
         //Fazer doacao
         //dataBase.fazerDoacao(5, 10, id_Cliente);
@@ -67,6 +90,159 @@ public class Main {
         //dataBase.cancelarProjecto(4);
 
         //Finalizar projectos
-        dataBase.finalizarProjectos();
+        //dataBase.finalizarProjectos();
     }
 }
+ class Connection extends Thread
+ {
+     int thread_number;
+     InputStream is;
+     ObjectInputStream ois;
+     Socket ClientSocket;
+     DataBase bd;
+     Shared_Clients sc = new Shared_Clients();
+
+
+
+     public Connection (Socket aClientSocket, int numero, DataBase BD) throws IOException {
+         bd = BD;
+         thread_number = numero;
+         ClientSocket = aClientSocket;
+         sc.addClient(ClientSocket);
+         this.start();
+
+     }
+
+     public void run()
+     {
+         try {
+             while(true) {
+                 //Aqui que se vai fazer o tratamento dos pedidos
+                 ois = new ObjectInputStream(ClientSocket.getInputStream());
+                 //Chegada de mensagem ---> Tratamento
+
+                 Pedido pedido= (Pedido) ois.readObject();
+
+                if(pedido.type.equals("LOGIN"))
+                {
+                    if(bd.login(pedido.username,pedido.password)== true)
+                    {
+                        Resposta respostaLog = new Resposta("SUCCESS LOGIN");
+                        sc.send_clients(respostaLog,thread_number);
+                    }
+                    else{
+                        Resposta respostaLog = new Resposta("INSUCCESS LOGIN");
+                        sc.send_clients(respostaLog,thread_number);
+                    }
+                }
+                 else if(pedido.type.equals("REGISTRY"))
+                 {
+                     int saldo_inicial = 100;
+                     if(bd.registarConta(pedido.name,pedido.username,pedido.password,saldo_inicial)==0)
+                     {
+                         Resposta respostaReg = new Resposta("REGISTRY SUCCESS");
+                         sc.send_clients(respostaReg,thread_number);
+                     }
+                     else if(bd.registarConta(pedido.name,pedido.username,pedido.password,saldo_inicial)==1)
+                     {
+                         Resposta respostaReg = new Resposta("REGISTRY INSUCCESS");
+                         sc.send_clients(respostaReg,thread_number);
+
+                     }
+                 }
+                 else if(pedido.type.equals("LIST ALL PROJECTS"))
+                {
+                    Resposta respostaListaProj = new Resposta("SUCCESS LIST");
+                            respostaListaProj.Projects = bd.listarProjectos(1);
+                    sc.send_clients(respostaListaProj,thread_number);
+                }
+                else if(pedido.type.equals("LIST ALL PAST PROJECTS"))
+                {
+                    Resposta respostaListaProj = new Resposta("SUCCESS LIST");
+                    respostaListaProj.Projects = bd.listarProjectos(0);
+                    sc.send_clients(respostaListaProj,thread_number);
+                }
+                else if(pedido.type.equals("CHECK BALANCE"))
+                {
+                    int id_cliente = bd.getIdCliente(pedido.username);
+                    int saldo = bd.consultarSaldo(id_cliente);
+                    Resposta rSaldo = new Resposta("BALANCE SUCESS");
+                    rSaldo.setSaldo(saldo);
+                    sc.send_clients(rSaldo,thread_number);
+                }
+
+
+             }
+         } catch (IOException e) {
+             System.out.println("Cliente Desconectado!");
+             try {
+                 ois.close();
+                 ClientSocket.close();
+             } catch (IOException e1) {
+                 e1.printStackTrace();
+             }
+         } catch (ClassNotFoundException e) {
+             e.printStackTrace();
+         } catch (SQLException e) {
+             e.printStackTrace();
+         }
+
+     }
+
+ }
+
+ class Shared_Clients {
+public static ArrayList<Socket> clientes = new ArrayList<Socket>();
+        ObjectOutputStream out;
+
+synchronized void addClient(Socket c)
+        {
+        clientes.add(c);
+        System.out.println("Cliente adicionado");
+        }
+
+synchronized void send_clients(Resposta answer, int clintNmr) throws IOException {
+
+        int i;
+        for(i=0;i<clientes.size();i++)
+        {
+        try{
+        if(clintNmr == i){
+        out = new ObjectOutputStream(clientes.get(i).getOutputStream());
+        out.writeObject(answer);
+        System.out.println("Enviado para " + i);
+        }
+        }catch(IOException e){System.out.println("IO:" + e);}
+
+        }
+        }
+        }
+
+class Resposta implements Serializable
+{
+ String resposta;
+    int saldo;
+
+    public int getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(int saldo) {
+        this.saldo = saldo;
+    }
+
+    public ArrayList<String> getProjects() {
+        return Projects;
+    }
+
+    public void setProjects(ArrayList<String> projects) {
+        Projects = projects;
+    }
+
+    ArrayList <String> Projects;
+
+    public Resposta(String resposta) {
+        this.resposta = resposta;
+    }
+}
+

@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
@@ -43,7 +44,7 @@ public class DataBase {
         System.out.println("[DATABASE] Oracle JDBC driver instalada");
 
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "root");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "pass");
         }catch (SQLException e){
             System.out.println("Falhou a fazer a connexao a base de dados!");
             System.out.println(e.getLocalizedMessage());
@@ -89,11 +90,11 @@ public class DataBase {
     }
 
     //Registar conta
-    public synchronized void registarConta(String nome_Cliente, String user_Name, String password, int saldo) throws SQLException{
+    public synchronized int registarConta(String nome_Cliente, String user_Name, String password, int saldo) throws SQLException{
 
         if (login(user_Name, password)){
             System.out.println("JA EXISTE ESSE USERNAME, POR FAVOR ESCOLHA OUTRO");
-            return;
+            return 1;
         }
         try{
 
@@ -103,15 +104,17 @@ public class DataBase {
             preparedStatement.setString(1, nome_Cliente);
             preparedStatement.setString(2, user_Name);
             preparedStatement.setString(3, password);
-            preparedStatement.setInt(4,saldo);
+            preparedStatement.setInt(4, saldo);
 
             preparedStatement.executeUpdate();
 
             System.out.println("QUELIENTE ADICIONADO! PARABÉNS");
+            return 0;
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
             e.printStackTrace();
         }
+        return 0;
     }
 
     //Login
@@ -166,13 +169,14 @@ public class DataBase {
     }
 
     //Listar projectos actuais ou acabados, basta mudar o atributo
+
     public synchronized ArrayList<String> listarProjectos(int state) throws SQLException{
         ArrayList<String> projectos_Actuais = new ArrayList<>();
         ArrayList<Projecto> projectosAux = getProjectos();
         String proj = "";
         for (int i = 0; i<projectosAux.size(); i++){
             if (projectosAux.get(i).getEstado() == state){
-                proj = "ID: " + projectosAux.get(i).getId_Projecto() + "  -----<> " + projectosAux.get(i).getNome_Projecto();
+                proj = "ID: " + projectosAux.get(i).getId_Projecto() + "  -----<> " +" Data Limite: "+projectosAux.get(i).getData_Limite().toString()+" Dinheiro Limite: "+projectosAux.get(i).getDinheiro_Limite()+" Dinheiro Angariado: "+projectosAux.get(i).getDinheiro_Angariado();
                 projectos_Actuais.add(proj);
             }
         }
