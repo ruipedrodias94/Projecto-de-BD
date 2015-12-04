@@ -10,8 +10,6 @@ import java.util.Date;
 
 public class Main {
 
-
-
     public static void main(String[] args) throws SQLException, ParseException {
 
         //Variaveis
@@ -21,9 +19,6 @@ public class Main {
         int saldo = 0;
         String detalhes = "";
         int numero_thread = 0;
-
-
-
 
         //TODO Carregar configuracoes de ficheiro
         int port = 7000;
@@ -39,7 +34,6 @@ public class Main {
                 new Connection(s,numero_thread,dataBase);
                 numero_thread++;
             }
-
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -102,15 +96,12 @@ public class Main {
      DataBase bd;
      Shared_Clients sc = new Shared_Clients();
 
-
-
      public Connection (Socket aClientSocket, int numero, DataBase BD) throws IOException {
          bd = BD;
          thread_number = numero;
          ClientSocket = aClientSocket;
          sc.addClient(ClientSocket);
          this.start();
-
      }
 
      public void run()

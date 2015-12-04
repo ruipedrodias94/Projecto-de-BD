@@ -32,6 +32,11 @@ public class DataBase {
         }
     }
 
+    /**
+     * Metodo responsavel pela conexão à base de dados. Verifica se temos a driver JDBC instalada e se as credenciais estão
+     * correctas
+     * @throws SQLException
+     */
     public synchronized void ConnectDataBase() throws SQLException{
 
         try {
@@ -57,8 +62,24 @@ public class DataBase {
         }
     }
 
-    //Funcoes de base de dados
+    /**
+     * Metodo para meter o autocommit a true
+     */
+    private void restoreAutoCommit() {
+        try {
+            connection.setAutoCommit(true);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
 
+    /**
+     * Metodo para obter o id do cliente através do seu username. Cada username tem de ser diferente. É unico, logo podemos
+     * usa lo como forma de identificação.
+     * @param username
+     * @return
+     * @throws SQLException
+     */
     //Obter o id do cliente logado
     public synchronized int getIdCliente(String username) throws SQLException{
         int id = 0;
@@ -74,6 +95,12 @@ public class DataBase {
         return id;
     }
 
+    /**
+     * Metodo para verificar o id de um projecto através do nome do projecto
+     * @param nomeProjecto
+     * @return
+     * @throws SQLException
+     */
     //Get o id do projecto
     public synchronized int getIdProjeto(String nomeProjecto) throws SQLException{
         int id = 0;
@@ -89,6 +116,15 @@ public class DataBase {
         return id;
     }
 
+    /**
+     * Metodo para registar um cliente
+     * @param nome_Cliente
+     * @param user_Name
+     * @param password
+     * @param saldo
+     * @return
+     * @throws SQLException
+     */
     //Registar conta
     public synchronized int registarConta(String nome_Cliente, String user_Name, String password, int saldo) throws SQLException{
 
@@ -97,10 +133,8 @@ public class DataBase {
             return 1;
         }
         try{
-
             preparedStatement = connection.prepareStatement("INSERT INTO proj_bd.cliente(nome_Cliente, user_Name, password, saldo)" +
                     "VALUES (?,?,?,?);");
-
             preparedStatement.setString(1, nome_Cliente);
             preparedStatement.setString(2, user_Name);
             preparedStatement.setString(3, password);
@@ -108,7 +142,7 @@ public class DataBase {
 
             preparedStatement.executeUpdate();
 
-            System.out.println("QUELIENTE ADICIONADO! PARABÉNS");
+            System.out.println("CLIENTE ADICIONADO! PARABÉNS");
             return 0;
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
@@ -117,6 +151,13 @@ public class DataBase {
         return 0;
     }
 
+    /**
+     * Metodo que verifica se uma conta já está registada através do username e da password
+     * @param user_Name
+     * @param password
+     * @return
+     * @throws SQLException
+     */
     //Login
     public synchronized boolean login(String user_Name, String password) throws SQLException{
         try{
@@ -136,6 +177,13 @@ public class DataBase {
         return false;
     }
 
+    /**
+     * Metodo que verifica se um dado projecto ja existe. Nós tratamos cada projecto pelo nome, ou seja, todos os projectos
+     * tem de ter nomes diferentes
+     * @param nome_Projecto
+     * @return
+     * @throws SQLException
+     */
     //Ver se o projecto ja existe
     public synchronized boolean projectExists(String nome_Projecto) throws SQLException{
         ArrayList<Projecto> projectosAux = getProjectos();
@@ -147,7 +195,10 @@ public class DataBase {
         return false;
     }
 
-    //GET PROJECTOS CARALHO
+    /**
+     * Metodo que retorna um arraylist dos projectos todos
+     * @return
+     */
     public synchronized ArrayList<Projecto> getProjectos(){
         ArrayList<Projecto> aux = new ArrayList<>();
         Projecto projectoAux;
@@ -168,8 +219,14 @@ public class DataBase {
         return aux;
     }
 
+    /**
+     * Metodo que lista um arraylist de strings que lista os projectos de acordo com o seu estado. state = 0, projecto acabado
+     * ou cancelado, state = 1, projecto activo
+     * @param state
+     * @return
+     * @throws SQLException
+     */
     //Listar projectos actuais ou acabados, basta mudar o atributo
-
     public synchronized ArrayList<String> listarProjectos(int state) throws SQLException{
         ArrayList<String> projectos_Actuais = new ArrayList<>();
         ArrayList<Projecto> projectosAux = getProjectos();
@@ -183,6 +240,12 @@ public class DataBase {
         return projectos_Actuais;
     }
 
+    /**
+     * Metodo que retorna um inteiro que é o saldo do cliente.
+     * @param id_Cliente
+     * @return
+     * @throws SQLException
+     */
     //Consultar o saldo
     public synchronized int consultarSaldo(int id_Cliente) throws SQLException{
         int saldo_Cliente = 0;
@@ -198,6 +261,12 @@ public class DataBase {
         return saldo_Cliente;
     }
 
+    /**
+     * Metodo que retorna um inteiro que é o saldo do projecto
+     * @param id_Projecto
+     * @return
+     * @throws SQLException
+     */
     //Consultar o saldo projecto
     public synchronized int consultarSaldoProjecto(int id_Projecto) throws SQLException{
         int saldo_Projecto = 0;
@@ -210,6 +279,16 @@ public class DataBase {
         return saldo_Projecto;
     }
 
+    /**
+     * Metodo que cria um projecto. Aquando da criação do projecto, damos a possibilidade ao cliente de criar também as
+     * suas recompensas. Cada projecto tem que ter obrigatoriamente uma recompensa. Neste caso para o valor doado ser igual a 0.
+     * @param nome_Projecto
+     * @param desricao_Projecto
+     * @param data
+     * @param id_Cliente
+     * @param dinheiro_Limite
+     * @throws SQLException
+     */
     //Criar um projecto
     public synchronized void criarProjecto(String nome_Projecto, String desricao_Projecto, String data,
                                            int id_Cliente, int dinheiro_Limite ) throws  SQLException{
@@ -272,6 +351,14 @@ public class DataBase {
 
     }
 
+    /**
+     * Metodo que cria recompensas. É chamado na criação de um projecto, visto que optamos por cada projecto ter pelo menos
+     * uma recompensa.
+     * @param descricao
+     * @param montante
+     * @param id_Projecto
+     * @throws SQLException
+     */
     //Criar uma recompensa
     public synchronized void criarRecompensa(String descricao, int montante, int id_Projecto) throws SQLException{
         try {
@@ -291,7 +378,12 @@ public class DataBase {
         }
     }
 
-
+    /**
+     * Metodo para listar os detalhes de um projecto. Nada de especial a acrescentar
+     * @param id_Projecto
+     * @return
+     * @throws SQLException
+     */
     //Listar detalhes do projecto
     public synchronized String listarDetalhes_Projecto(int id_Projecto) throws SQLException{
         String string_Final = "";
@@ -309,6 +401,15 @@ public class DataBase {
         return string_Final;
     }
 
+
+    /**
+     * Metodo que faz uma doação. De acordo com o dinheiro que doa, o cliente pode criar um voto, é feita a doação
+     * e é feito também um update no saldo do cliente e no saldo do projecto
+     * @param id_Projecto
+     * @param valor
+     * @param id_Cliente
+     * @throws SQLException
+     */
     //Inacabada
     //Fazer doação ao projecto
     public synchronized void fazerDoacao(int id_Projecto, int valor, int id_Cliente) throws SQLException {
@@ -358,6 +459,13 @@ public class DataBase {
         id_Voto++;
     }
 
+
+    /**
+     * Metodo que faz o update do saldo do cliente aquando é feita ou retirada uma doação
+     * @param id_Cliente
+     * @param novoSaldo
+     * @throws SQLException
+     */
     //Faz update do saldo cliente
     public synchronized void updateSaldoCliente(int id_Cliente, int novoSaldo) throws SQLException{
 
@@ -366,23 +474,51 @@ public class DataBase {
             preparedStatement = connection.prepareStatement(" UPDATE proj_bd.cliente SET saldo = "+novoSaldo+" WHERE idCliente = "+id_Cliente+";");
             preparedStatement.executeUpdate();
 
+            connection.commit();
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
+            try{
+                connection.rollback();
+                connection.setAutoCommit(true);
+            }catch (SQLException e1){
+                System.out.println(e1.getLocalizedMessage());
+            }
         }
+        restoreAutoCommit();
     }
 
+    /**
+     * Metodo que faz o update do saldo do projecto aquando é feita ou retirada uma doação
+     * @param id_Projecto
+     * @param novoSaldo
+     * @throws SQLException
+     */
     //Faz update do saldo projecto
     public synchronized void updateSaldoProjecto(int id_Projecto, int novoSaldo) throws SQLException{
 
         try {
+            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(" UPDATE proj_bd.projecto SET dinheiro_Angariado = "+novoSaldo+" WHERE idProjecto = "+id_Projecto+";");
             preparedStatement.executeUpdate();
+            connection.commit();
 
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
+            try {
+                connection.rollback();
+            }catch (SQLException e1) {
+                System.out.println(e1.getLocalizedMessage());
+            }
         }
     }
 
+    /**
+     * Metodo que retorna um arraylist das recompensas de acordo com o dinheiro que o cliente quer doar, para ser usado posteriormente
+     * na criação do voto
+     * @param id_Projecto
+     * @return
+     * @throws SQLException
+     */
     //Listar as recompensas de acordo com o valor
     public synchronized ArrayList<Recompensa> getRecompensas(int id_Projecto) throws SQLException{
         ArrayList<Recompensa> recompensasAux = new ArrayList<>();
@@ -402,6 +538,12 @@ public class DataBase {
         return recompensasAux;
     }
 
+    /**
+     * Metodo que cria um voto baseado na recompensa e no id do projecto
+     * @param id_Recompensa
+     * @param id_Projecto
+     * @throws SQLException
+     */
     //Criar voto
     public synchronized void criarVoto(int id_Recompensa, int id_Projecto) throws SQLException{
         try {
@@ -422,7 +564,6 @@ public class DataBase {
 
     //Criar doacao
     //Exemplo 1
-    //TODO PEDIR OPINIÃO AO PROFESSOR DE QUAL A MELHOR METODOLOGIA A USAR
     public synchronized void criarDoacao(int montante, int id_Recompensa,int id_Voto, int id_Cliente,  int id_Projecto) throws SQLException{
         try {
 
@@ -436,7 +577,6 @@ public class DataBase {
             preparedStatement.setInt(5, id_Projecto);
 
             preparedStatement.executeUpdate();
-
             boolean ok = askUserTransaction();
             if(ok){
                 connection.commit();
@@ -446,18 +586,18 @@ public class DataBase {
         } catch (SQLException e) {
             System.out.println(e.getLocalizedMessage());
             try{
-                //Ou este
                 connection.rollback();
-                //Ou este
-                preparedStatement = connection.prepareStatement("ROLLBACK ");
-                //TODO PERGUNTAR AO PROFESSOR NESTA PARTE
             }catch (SQLException e1){
-                //Ignore
+                System.out.println(e1.getLocalizedMessage());
             }
         }
 
     }
 
+    /**
+     * Metodo simples que apenas confirma se queremos continuar a transação
+     * @return
+     */
     public boolean askUserTransaction(){
         System.out.println("QUER FINALIZAR ESTA TRANSAÇÃO?  -----<> S/N");
         String decisao = sc.nextLine();
@@ -468,6 +608,11 @@ public class DataBase {
     }
 
     //Função para ver o id do voto
+
+    /**
+     * Metodo para retornar o id do voto
+     * @return
+     */
     public synchronized int getIdVoto(){
         int id_Voto = 0;
         try {
@@ -483,6 +628,12 @@ public class DataBase {
     }
 
     //Cancelar projecto
+    /**
+     * Metodo para cancelar um projecto atravez do seu id. Muda o estado do projecto para 0 (acabado) e retorna o dinheiro
+     * a quem doou.
+     * @param id_Projecto
+     * @throws SQLException
+     */
     public synchronized void cancelarProjecto(int id_Projecto) throws SQLException {
         ArrayList<Doacao> doacoes = getDoacoes(id_Projecto);
         int saldo_Cliente = 0;
@@ -503,6 +654,11 @@ public class DataBase {
         System.out.println("PROJECTO FOI CANCELADO\nSALDO DO CLIENTE FOI RESTAURADO, OBRIGADO");
     }
 
+    /**
+     * Metodo que retorna um arraylist das doações de um certo projecto
+     * @param id_Projecto
+     * @return
+     */
     //Get doacoes
     public synchronized ArrayList<Doacao> getDoacoes(int id_Projecto){
         ArrayList<Doacao> doacoesAux = new ArrayList<>();
@@ -521,6 +677,12 @@ public class DataBase {
         return doacoesAux;
     }
 
+    /**
+     * Metodo para finalizar um projecto
+     * Verifica a data e o dinheiro limite, sempre que a data é ultrapassada e o dinheiro limite não satisfaz os requisitos
+     * o dinheiro é restituído aos clientes que doaram para esse projecto
+     * @throws SQLException
+     */
     //Finalizar projecto
     //Verificar data, e o dinheiro limite, se foi bem sucedido tudo bem, senao faz o cancelar projecto xD
     public synchronized void finalizarProjectos() throws SQLException {
@@ -545,6 +707,5 @@ public class DataBase {
         for (int i = 0; i< naoCumpriram.size(); i++){
             cancelarProjecto(naoCumpriram.get(i));
         }
-
     }
 }

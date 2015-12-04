@@ -40,6 +40,8 @@ public class ClienteMenu {
                             System.out.println("2 - Listar Projectos Antigos");
                             System.out.println("3 - Consultar Saldo");
                             System.out.println("4 - Consultar Recompensas");
+                            System.out.println("5 - Criar Projecto");
+                            System.out.println("6 - Doar para Projecto");
                             opcao = entrada.nextInt();
                             switch (opcao)
                             {
@@ -180,7 +182,6 @@ class Pedido implements Serializable
     String name;
 
 
-
     public String getUsername() {
         return username;
     }
@@ -212,7 +213,6 @@ class Pedido implements Serializable
     public void setName(String name) {
         this.name = name;
     }
-
 
 
     public Pedido(String username, String password, String type,String name) {
