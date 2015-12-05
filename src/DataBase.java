@@ -220,6 +220,33 @@ public class DataBase {
     }
 
     /**
+     * Metodo que retorna um arraylist de projectos por utilizador
+     * Vai ser usado para adicionar ou remover recompensas
+     * @param id_Cliente
+     * @return
+     */
+    public synchronized ArrayList<Projecto> getProjectosUser(int id_Cliente) throws SQLException{
+        ArrayList<Projecto> aux = new ArrayList<>();
+        Projecto projectoAux;
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("SELECT idProjecto, nome_Projecto, descricao_Projecto, estado, data_Limite, dinheiro_Angariado, dinheiro_Limite, Cliente_idCliente" +
+                    " FROM proj_bd.projecto WHERE Cliente_idCliente = " + id_Cliente +  ";");
+
+            while (resultSet.next()){
+                projectoAux = new Projecto(resultSet.getInt(1),resultSet.getString(2), resultSet.getString(3), resultSet.getInt(4), resultSet.getDate(5), resultSet.getInt(6),
+                        resultSet.getInt(7), resultSet.getInt(8));
+
+                aux.add(projectoAux);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return aux;
+    }
+
+
+    /**
      * Metodo que lista um arraylist de strings que lista os projectos de acordo com o seu estado. state = 0, projecto acabado
      * ou cancelado, state = 1, projecto activo
      * @param state
@@ -375,6 +402,29 @@ public class DataBase {
 
         } catch (SQLException e) {
             System.out.println(e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * Metodo que apaga recompensas atraves do seu id
+     * Antes deste metodo ser chamado devemos recorrer ao uso do metodo getProjectosUser() para ele ver qual os projectos que lhe pertencem
+     * E depois disso chamar o metodo getRecompensas e usar o id do projecto escolhido anteriormente
+     * @param id_Recompensa
+     */
+    public synchronized void deleteRecompensa(int id_Recompensa){
+
+        try {
+            connection.setAutoCommit(false);
+            statement = connection.createStatement();
+            statement.executeUpdate("DELETE FROM proj_bd.recompensa WHERE idRecomensa = " + id_Recompensa + ";");
+            connection.commit();
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+            try{
+                connection.rollback();
+            }catch (SQLException e1){
+                //Ignore
+            }
         }
     }
 
