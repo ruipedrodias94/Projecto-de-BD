@@ -218,34 +218,7 @@ public class DataBase {
         }
         return aux;
     }
-
-    /**
-     * Metodo que retorna um arraylist de projectos por utilizador
-     * Vai ser usado para adicionar ou remover recompensas
-     * @param id_Cliente
-     * @return
-     */
-    public synchronized ArrayList<Projecto> getProjectosUser(int id_Cliente) throws SQLException{
-        ArrayList<Projecto> aux = new ArrayList<>();
-        Projecto projectoAux;
-        try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT idProjecto, nome_Projecto, descricao_Projecto, estado, data_Limite, dinheiro_Angariado, dinheiro_Limite, Cliente_idCliente" +
-                    " FROM proj_bd.projecto WHERE Cliente_idCliente = " + id_Cliente +  ";");
-
-            while (resultSet.next()){
-                projectoAux = new Projecto(resultSet.getInt(1),resultSet.getString(2), resultSet.getString(3), resultSet.getInt(4), resultSet.getDate(5), resultSet.getInt(6),
-                        resultSet.getInt(7), resultSet.getInt(8));
-
-                aux.add(projectoAux);
-            }
-        }catch (SQLException e){
-            System.out.println(e.getLocalizedMessage());
-        }
-        return aux;
-    }
-
-
+    
     /**
      * Metodo que lista um arraylist de strings que lista os projectos de acordo com o seu estado. state = 0, projecto acabado
      * ou cancelado, state = 1, projecto activo
@@ -463,7 +436,7 @@ public class DataBase {
     //Fazer doação ao projecto
     public synchronized void fazerDoacao(int id_Projecto, int valor, int id_Cliente) throws SQLException {
         int valor_Cliente, valor_Projecto;
-        ArrayList<Recompensa> recompensas = getRecompensas(id_Projecto);
+        ArrayList<Recompensa> recompensas = getRecompensas();
         int id_Recompensa;
         int id_Voto = 0;
 
@@ -477,8 +450,10 @@ public class DataBase {
 
             //Imprime as recompensas
             for (int i = 0; i<recompensas.size(); i++ ){
-                if (recompensas.get(i).getMontante_Recompensa() <= valor) {
-                    System.out.println("ID RECOMPENSA: " + String.valueOf(recompensas.get(i).getId_Recompensa())+ " -------<>  " + recompensas.get(i).getDescricao_Recompensa());
+                if(recompensas.get(i).getProjecto_idProjecto() == id_Projecto){
+                    if (recompensas.get(i).getMontante_Recompensa() <= valor) {
+                        System.out.println("ID RECOMPENSA: " + String.valueOf(recompensas.get(i).getId_Recompensa())+ " -------<>  " + recompensas.get(i).getDescricao_Recompensa());
+                    }
                 }
             }
 
@@ -507,7 +482,6 @@ public class DataBase {
 
         id_Voto++;
     }
-
 
     /**
      * Metodo que faz o update do saldo do cliente aquando é feita ou retirada uma doação
@@ -562,20 +536,19 @@ public class DataBase {
     }
 
     /**
-     * Metodo que retorna um arraylist das recompensas de acordo com o dinheiro que o cliente quer doar, para ser usado posteriormente
-     * na criação do voto
-     * @param id_Projecto
+     * Metodo que retorna um arraylist das recompensas de cada utilizador
+     * Atenção que depois esta parte vai ser feita no menu. Listar as recompensas de utilizador, ou listar as recompensas
+     * de cada projecto
      * @return
      * @throws SQLException
      */
-    //Listar as recompensas de acordo com o valor
-    public synchronized ArrayList<Recompensa> getRecompensas(int id_Projecto) throws SQLException{
+    public synchronized ArrayList<Recompensa> getRecompensas() throws SQLException{
         ArrayList<Recompensa> recompensasAux = new ArrayList<>();
         Recompensa recompensa;
         try {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(" SELECT idRecompensa, descricao_Recompensa, montante_Recompensa, Projecto_idProjecto" +
-                    " FROM proj_bd.recompensa WHERE Projecto_idProjecto= " + id_Projecto + " ;");
+                    " FROM proj_bd.recompensa");
 
             while (resultSet.next()){
                 recompensa = new Recompensa(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4));
@@ -640,7 +613,6 @@ public class DataBase {
                 System.out.println(e1.getLocalizedMessage());
             }
         }
-
     }
 
     /**
