@@ -21,7 +21,7 @@ public class Main {
         int numero_thread = 0;
 
         //TODO Carregar configuracoes de ficheiro
-        int port = 7000;
+        int port = 6000;
         try{
             //Esta vai ser a nossa interface!
             DataBase dataBase = new DataBase();
@@ -160,6 +160,27 @@ public class Main {
                     Resposta rSaldo = new Resposta("BALANCE SUCESS");
                     rSaldo.setSaldo(saldo);
                     sc.send_clients(rSaldo,thread_number);
+                }
+                else if(pedido.type.equals("CHECK PROJECT EXISTS"))
+                {
+                    if(bd.projectExists(pedido.getProjectName())==false)
+                    {
+                        Resposta RPrjName = new Resposta("PROJECT NAME OK");
+                        sc.send_clients(RPrjName,thread_number);
+                    }
+                    else
+                    {
+                        Resposta RPrjName = new Resposta("PROJECT NAME ALREADY TAKEN");
+                        sc.send_clients(RPrjName,thread_number);
+                    }
+                }
+                 else if(pedido.type.equals("NEW PROJECT"))
+                {
+
+                    String data = Integer.toString(pedido.getYear())+"-"+Integer.toString(pedido.getMonth())+"-"+Integer.toString(pedido.getDay());
+                    String CriaPrj = bd.criarProjecto(pedido.getProjectName(), pedido.getDescriptionProject(), data, bd.getIdCliente(pedido.username), pedido.limit_cash, pedido.getArrayRecompensas());
+                    Resposta rspCriaProj = new Resposta(CriaPrj);
+                    sc.send_clients(rspCriaProj,thread_number);
                 }
 
 

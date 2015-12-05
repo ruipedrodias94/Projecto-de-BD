@@ -87,8 +87,64 @@ public class ClienteMenu {
                                 }
                                 case 4:
                                 {
+
                                     break;
                                 }
+                                case 5:
+                                    String nomeProj;
+                                    while(true)
+                                    {
+                                        p = new Pedido(user,null,"CHECK PROJECT EXISTS",null);
+                                        System.out.println("Insira um nome para o Projecto:");
+                                        p.setProjectName(entrada.next());
+                                        nomeProj = p.getProjectName();
+                                        lt.send(p);
+                                        Resposta r = lt.receive();
+                                        if(r.resposta.equals("PROJECT NAME OK"))
+                                        {break;}
+                                        else
+                                        {
+                                            System.out.println("Nome de Projecto já existe por favor insira outro:");
+                                        }
+
+
+                                    }
+                                    p = new Pedido(user,null,"NEW PROJECT",null);
+                                    p.setProjectName(nomeProj);
+                                    entrada.nextLine();
+                                    System.out.println("Insira uma descrição do projecto:");
+                                    p.setDescriptionProject(entrada.nextLine());
+                                    System.out.println("Insira uma data limite para o projecto.");
+                                    System.out.println("Ano:");
+                                    p.setYear(entrada.nextInt());
+                                    System.out.println("Mês:");
+                                    p.setMonth(entrada.nextInt());
+                                    System.out.println("Dia:");
+                                    p.setDay(entrada.nextInt());
+                                    System.out.println("Insira uma quantia a atingir:");
+                                    p.setLimit_cash(entrada.nextInt());
+                                    System.out.println("Quantas Recompensas pretende adicionar ao projecto?");
+                                    int rec = entrada.nextInt();
+                                    while(rec>0)
+                                    {
+                                        entrada.nextLine();
+                                        System.out.println("Insira uma descição da Recompensa:");
+                                        String desc_aux = entrada.nextLine();
+                                        System.out.println("A partir de que montante quer que a recompensa seja oferecida?");
+                                        int mont_aux = entrada.nextInt();
+                                        Recompensa_proj rP = new Recompensa_proj(desc_aux,mont_aux);
+                                        p.getArrayRecompensas().add(rP);
+                                        rec--;
+                                    }
+                                    lt.send(p);
+                                    Resposta r = lt.receive();
+                                    if(r.resposta.equals("PROJECTO CRIADO COM SUCESSO"))
+                                    {
+                                        System.out.println("Projecto Criado Com Sucesso!\n");
+                                    }
+                                    break;
+
+
                             }
 
                         }
@@ -130,7 +186,7 @@ public class ClienteMenu {
 
  class LigacaoTCP{
      String hostname = "localhost";
-     int port = 7000;
+     int port = 6000;
      Socket s;
 
      public void ligaCliente() {
@@ -180,7 +236,70 @@ class Pedido implements Serializable
     String password;
     String type;
     String name;
+    String projectName;
+    String DescriptionProject;
+    int Day;
+    int Month;
 
+    public ArrayList<Recompensa_proj> getArrayRecompensas() {
+        return arrayRecompensas;
+    }
+
+    public void setArrayRecompensas(ArrayList<Recompensa_proj> arrayRecompensas) {
+        this.arrayRecompensas = arrayRecompensas;
+    }
+
+    int Year;
+    int limit_cash;
+    ArrayList <Recompensa_proj> arrayRecompensas = new ArrayList<>();
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public String getDescriptionProject() {
+        return DescriptionProject;
+    }
+
+    public void setDescriptionProject(String descriptionProject) {
+        DescriptionProject = descriptionProject;
+    }
+
+    public int getDay() {
+        return Day;
+    }
+
+    public void setDay(int day) {
+        Day = day;
+    }
+
+    public int getMonth() {
+        return Month;
+    }
+
+    public void setMonth(int month) {
+        Month = month;
+    }
+
+    public int getYear() {
+        return Year;
+    }
+
+    public void setYear(int year) {
+        Year = year;
+    }
+
+    public int getLimit_cash() {
+        return limit_cash;
+    }
+
+    public void setLimit_cash(int limit_cash) {
+        this.limit_cash = limit_cash;
+    }
 
     public String getUsername() {
         return username;
@@ -224,4 +343,14 @@ class Pedido implements Serializable
 
 }
 
+class Recompensa_proj implements Serializable
+{
+    String description;
+    int montante;
+
+    public Recompensa_proj(String description, int montante) {
+        this.description = description;
+        this.montante = montante;
+    }
+}
 

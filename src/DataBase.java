@@ -49,7 +49,7 @@ public class DataBase {
         System.out.println("[DATABASE] Oracle JDBC driver instalada");
 
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "root");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "pass");
         }catch (SQLException e){
             System.out.println("Falhou a fazer a connexao a base de dados!");
             System.out.println(e.getLocalizedMessage());
@@ -317,8 +317,8 @@ public class DataBase {
      * @throws SQLException
      */
     //Criar um projecto
-    public synchronized void criarProjecto(String nome_Projecto, String desricao_Projecto, String data,
-                                           int id_Cliente, int dinheiro_Limite ) throws  SQLException{
+    public synchronized String criarProjecto(String nome_Projecto, String desricao_Projecto, String data,
+                                           int id_Cliente, int dinheiro_Limite,ArrayList<Recompensa_proj> ARP ) throws  SQLException{
         //Saldo = 0
         //Estado = 1 ---> Activo
         //Data limite ---> Ainda nao sei
@@ -331,50 +331,49 @@ public class DataBase {
         int montante = 0;
         String descricao = "";
         int id_Projecto = 0;
-
+        String r = "PROJECTO CRIADO COM SUCESSO";
         if(projectExists(nome_Projecto)){
             System.out.println("JA EXISTE UM PROJECTO COM ESSE NOME, POR FAVOR ESCOLHA OUTRO!");
-            return;
         }
         try{
             preparedStatement = connection.prepareStatement("INSERT INTO proj_bd.projecto (nome_Projecto, descricao_Projecto, estado, data_Limite," +
                     " dinheiro_Angariado, dinheiro_Limite, Cliente_idCliente) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?);");
 
-            preparedStatement.setString(1,nome_Projecto);
-            preparedStatement.setString(2,desricao_Projecto);
+            preparedStatement.setString(1, nome_Projecto);
+            preparedStatement.setString(2, desricao_Projecto);
             preparedStatement.setInt(3, 1);
             preparedStatement.setDate(4, java.sql.Date.valueOf(data));
             preparedStatement.setInt(5, 0);
-            preparedStatement.setInt(6,dinheiro_Limite);
+            preparedStatement.setInt(6, dinheiro_Limite);
             preparedStatement.setInt(7, id_Cliente);
 
             preparedStatement.executeUpdate();
 
-            System.out.println("PROJECTO CRIADO COM SUCESSO");
+
 
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
+            return "ERROR CREATING PROJECT";
         }
 
         id_Projecto = getIdProjeto(nome_Projecto);
 
-        System.out.println("QUANTAS RECOMPENSAS DESEJA CRIAR?");
-        quantidade = sc.nextInt();
-        sc.nextLine();
-        while (quantidade > 0){
+
+
+        for(int i=0;i<ARP.size();i++){
             System.out.println("DESCRICAO DA RECOMPENSA: ");
-            descricao = sc.nextLine();
+            descricao = ARP.get(i).description;
             System.out.println("MONTANTE A PARTIR DO QUAL O CLIENTE RECEBER A RECOMPENSA: ");
-            montante = sc.nextInt();
-            sc.nextLine();
+            montante = ARP.get(i).montante;
             criarRecompensa(descricao, montante, id_Projecto);
-            quantidade--;
+
         }
 
-        System.out.println("POR FIM UMA RECOMPENSA DEFAULT ----> MONTANTE = 0 \nDESCRICAO DA RECOMPENSA: ");
-        descricao = sc.nextLine();
-        criarRecompensa(descricao, 0, id_Projecto);
+       // System.out.println("POR FIM UMA RECOMPENSA DEFAULT ----> MONTANTE = 0 \nDESCRICAO DA RECOMPENSA: ");
+
+        //criarRecompensa(descricao, 0, id_Projecto);
+        return r;
 
     }
 
