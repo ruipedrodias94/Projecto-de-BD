@@ -1,7 +1,9 @@
+import java.io.Serializable;
+
 /**
  * Created by Rui Dias on 30/11/2015.
  */
-public class Recompensa {
+public class Recompensa implements Serializable{
     private int id_Recompensa;
     private String descricao_Recompensa;
     private int montante_Recompensa;

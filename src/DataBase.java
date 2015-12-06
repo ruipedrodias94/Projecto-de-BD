@@ -95,6 +95,21 @@ public class DataBase {
         return id;
     }
 
+    //Get o id do projecto
+    public synchronized int getNVotosAlt(int id_voto) throws SQLException{
+        int n = 0;
+        try{
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("SELECT * FROM proj_bd.voto WHERE idVoto = '" + id_voto + "';");
+            while (resultSet.next()){
+                n = resultSet.getInt(4);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return n;
+    }
+
     /**
      * Metodo para verificar o id de um projecto através do nome do projecto
      * @param nomeProjecto
@@ -453,11 +468,11 @@ public class DataBase {
      */
     //Inacabada
     //Fazer doação ao projecto
-    public synchronized void fazerDoacao(int id_Projecto, int valor, int id_Cliente) throws SQLException {
+    public synchronized int fazerDoacao(int id_Projecto, int valor, int id_Cliente,int id_Recompensa,int id_voto) throws SQLException {
         int valor_Cliente, valor_Projecto;
         ArrayList<Recompensa> recompensas = getRecompensas();
-        int id_Recompensa;
-        int id_Voto = 0;
+
+
 
         valor_Cliente = consultarSaldo(id_Cliente);
         valor_Projecto = consultarSaldoProjecto(id_Projecto);
@@ -467,19 +482,12 @@ public class DataBase {
             System.out.println("DE ACORDO COM O VALOR QUE QUER DOAR, ESTAS SAO AS RECOMPENSAS DISPONIVEIS PARA VOTAR. " +
                     "ATENCAO QUE A RECOMPENSA EM QUE VOTAR VAI SER A QUE LHE VAI FICAR ATRIBUIDA");
 
-            //Imprime as recompensas
-            for (int i = 0; i<recompensas.size(); i++ ){
-                if(recompensas.get(i).getProjecto_idProjecto() == id_Projecto){
-                    if (recompensas.get(i).getMontante_Recompensa() <= valor) {
-                        System.out.println("ID RECOMPENSA: " + String.valueOf(recompensas.get(i).getId_Recompensa())+ " -------<>  " + recompensas.get(i).getDescricao_Recompensa());
-                    }
-                }
-            }
 
-            System.out.println("EM QUE RECOMPENSA VAI VOTAR?");
-            id_Recompensa = sc.nextInt();
+
+
             //Cria o voto
             //criarVoto(id_Recompensa, id_Projecto);
+            VotoAlternativa(id_voto);
 
             //Recalcula o valor do cliente e faz o update
             valor_Cliente = valor_Cliente - valor;
@@ -489,17 +497,39 @@ public class DataBase {
             valor_Projecto = valor_Projecto + valor;
             updateSaldoProjecto(id_Projecto, valor_Projecto);
 
-            id_Voto = getIdVoto();
+
 
             //Cria a doaçao
-            criarDoacao(valor, id_Recompensa, id_Voto, id_Cliente, id_Projecto);
+            criarDoacao(valor, id_Recompensa, id_voto, id_Cliente, id_Projecto);
+            return 0;
 
         }else{
             System.out.println("NAO TEM DINHEIRO SUFICIENTE");
-            return;
+            return 1;
         }
 
-        id_Voto++;
+    }
+
+    public synchronized void VotoAlternativa(int id_Voto) throws SQLException{
+
+        int n_votos = getNVotosAlt(id_Voto);
+        n_votos++;
+        try {
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(" UPDATE proj_bd.voto SET num_Votos = "+n_votos+" WHERE idVoto = "+id_Voto+";");
+            preparedStatement.executeUpdate();
+
+            connection.commit();
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+            try{
+                connection.rollback();
+                connection.setAutoCommit(true);
+            }catch (SQLException e1){
+                System.out.println(e1.getLocalizedMessage());
+            }
+        }
+        restoreAutoCommit();
     }
 
     /**
@@ -552,6 +582,26 @@ public class DataBase {
                 System.out.println(e1.getLocalizedMessage());
             }
         }
+    }
+
+
+    public synchronized ArrayList<Recompensa> getRecompensasIDProj(int IDProjecto) throws SQLException {
+        ArrayList<Recompensa> recompensasAux = new ArrayList<>();
+        Recompensa recompensa;
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(" SELECT idRecompensa ,descricao_Recompensa, montante_Recompensa, Projecto_idProjecto" +
+                    " FROM proj_bd.recompensa WHERE Projecto_idProjecto='"+IDProjecto+"';");
+
+            while (resultSet.next()){
+                recompensa = new Recompensa(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4));
+                recompensasAux.add(recompensa);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return recompensasAux;
+
     }
 
     /**
@@ -619,7 +669,7 @@ public class DataBase {
             preparedStatement.setInt(5, id_Projecto);
 
             preparedStatement.executeUpdate();
-            boolean ok = askUserTransaction();
+            boolean ok = true;
             if(ok){
                 connection.commit();
                 connection.setAutoCommit(true);
@@ -716,6 +766,24 @@ public class DataBase {
             System.out.println(e.getLocalizedMessage());
         }
         return doacoesAux;
+    }
+
+    //Get doacoes
+    public synchronized ArrayList<Voto> getAltIdRecompensa(int id_Recompensa){
+        ArrayList<Voto> altAux = new ArrayList<>();
+        Voto AlterAux;
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(" SELECT  idVoto, descricao" +
+                    " FROM proj_bd.Voto WHERE id_Recompensa = "+id_Recompensa + ";");
+            while (resultSet.next()){
+                AlterAux = new Voto(resultSet.getInt(1),resultSet.getString(2));
+                altAux.add(AlterAux);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return altAux;
     }
 
     /**

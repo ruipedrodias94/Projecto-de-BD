@@ -1,3 +1,6 @@
+import com.sun.tools.doclets.formats.html.SourceToHTMLConverter;
+
+import javax.sound.midi.Soundbank;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -184,7 +187,71 @@ public class ClienteMenu {
                                     }
                                     System.out.println("Insira o ID do projecto a que pretende fazer doação:");
                                     int ID_PROJ = entrada.nextInt();
+                                    p = new Pedido(user,null,"LIST REWARDS PROJECT",null);
+                                    p.setId_prj(ID_PROJ);
+                                    lt.send(p);
+                                    ArrayList <Recompensa> Ar;
+                                    r = lt.receive();
+                                    Ar = r.getRecompensas();
+                                    System.out.println("Recompensas: ");
+                                    for(int i=0;i<Ar.size();i++)
+                                    {
+                                        System.out.println("ID: "+Ar.get(i).getId_Recompensa()+" "+"Descriçao: "+Ar.get(i).getDescricao_Recompensa()+" Montante Necessario: "+Ar.get(i).getMontante_Recompensa());
+                                    }
+                                    System.out.println("Insira ID da recompensa que pretende:");
+                                    int ID_Recompensa = entrada.nextInt();
+                                    entrada.nextLine();
+                                    int montante_necessario=0;
+                                    for(int i=0;i<Ar.size();i++)
+                                    {
+                                        if(ID_Recompensa==Ar.get(i).getId_Recompensa())
+                                        {
+                                            montante_necessario = Ar.get(i).getMontante_Recompensa();
+                                        }
+                                    }
+                                    p = new Pedido(user,null,"CHECK BALANCE",null);
+                                    lt.send(p);
+                                    Resposta r2 = lt.receive();
+                                    if(r2.getSaldo()<montante_necessario)
+                                    {
+                                        System.out.println(" O seu saldo é inferior a recompensa pretendida! Saldo: "+r2.getSaldo());
+                                        break;
+                                    }
+
+                                    p  = new Pedido(user,null,"LIST ALTERNATIVES",null);
+                                    p.setId_Recompensa(ID_Recompensa);
+                                    lt.send(p);
+                                    ArrayList <Voto> aV = new ArrayList<>();
+                                    r = lt.receive();
+                                    aV = r.getArrayAlter();
+                                    for(int i = 0 ;i<aV.size();i++)
+                                    {
+                                        System.out.println(" ID Aternativa: "+aV.get(i).idVoto+" Descricao: "+aV.get(i).descricao);
+                                    }
+                                    System.out.println("Insira o ID da alternativa que pretende: ");
+                                    int idAlternativa = entrada.nextInt();
+                                    entrada.nextLine();
+                                    p = new Pedido(user,null,"MAKE DONATION",null);
+                                    p.setId_Recompensa(ID_Recompensa);
+                                    p.setId_prj(ID_PROJ);
+                                    p.setId_Voto(idAlternativa);
+                                    System.out.println("Insira o valor que pretende doar (pode ser mais que a recompensa mas nao pode ser menos): ");
+                                    int montante_doacao = entrada.nextInt();
+                                    entrada.nextLine();
+                                    p.setMontanteDoar(montante_doacao);
+                                    lt.send(p);
+                                    Resposta finalAnswer = lt.receive();
+                                    if(finalAnswer.resposta.equals("DONATION SUCCESS"))
+                                    {
+                                        System.out.println("Doacao efectuada com sucesso!");
+                                    }
+                                    else if(finalAnswer.resposta.equals("DONATION INSUCCESS"))
+                                    {
+                                        System.out.println("Erro! doacao nao concluida!");
+                                    }
+
                                     break;
+
 
                                 }
 
@@ -282,6 +349,43 @@ class Pedido implements Serializable
     String name;
     String projectName;
     String DescriptionProject;
+    int id_prj;
+    int id_Recompensa;
+    int id_Voto;
+    int montanteDoar;
+
+    public int getMontanteDoar() {
+        return montanteDoar;
+    }
+
+    public void setMontanteDoar(int montanteDoar) {
+        this.montanteDoar = montanteDoar;
+    }
+
+    public int getId_Voto() {
+        return id_Voto;
+    }
+
+    public void setId_Voto(int id_Voto) {
+        this.id_Voto = id_Voto;
+    }
+
+    public int getId_Recompensa() {
+        return id_Recompensa;
+    }
+
+    public void setId_Recompensa(int id_Recompensa) {
+        this.id_Recompensa = id_Recompensa;
+    }
+
+    public int getId_prj() {
+        return id_prj;
+    }
+
+    public void setId_prj(int id_prj) {
+        this.id_prj = id_prj;
+    }
+
     int Day;
     int Month;
 

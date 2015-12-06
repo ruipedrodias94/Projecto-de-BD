@@ -182,6 +182,34 @@ public class Main {
                     Resposta rspCriaProj = new Resposta(CriaPrj);
                     sc.send_clients(rspCriaProj,thread_number);
                 }
+                else if(pedido.type.equals("LIST REWARDS PROJECT"))
+                {
+                    Resposta RwrdPrj = new Resposta("PRJ REWARDS LIST");
+                    RwrdPrj.setRecompensas(bd.getRecompensasIDProj(pedido.getId_prj()));
+                    sc.send_clients(RwrdPrj,thread_number);
+                }
+                 else if(pedido.type.equals("LIST ALTERNATIVES"))
+                {
+                    Resposta RspAlt = new Resposta("ALTERNATIVES LIST");
+                    RspAlt.setArrayAlter(bd.getAltIdRecompensa(pedido.getId_Recompensa()));
+                    sc.send_clients(RspAlt,thread_number);
+
+                }
+                 else if(pedido.type.equals("MAKE DONATION"))
+                {
+                    Resposta rspDoa;
+                    int id_cliente = bd.getIdCliente(pedido.getUsername());
+                    if(bd.fazerDoacao(pedido.getId_prj(),pedido.getMontanteDoar(),id_cliente,pedido.getId_Recompensa(),pedido.getId_Voto())==0)
+                    {
+                     rspDoa = new Resposta("DONATION SUCCESS");
+                        sc.send_clients(rspDoa,thread_number);
+                    }
+                    else
+                    {
+                      rspDoa = new Resposta("DONATION INSUCCESS");
+                        sc.send_clients(rspDoa,thread_number);
+                    }
+                }
 
 
              }
@@ -234,6 +262,25 @@ class Resposta implements Serializable
 {
  String resposta;
     int saldo;
+    ArrayList <Voto> arrayAlter;
+
+    public ArrayList<Voto> getArrayAlter() {
+        return arrayAlter;
+    }
+
+    public void setArrayAlter(ArrayList<Voto> arrayAlter) {
+        this.arrayAlter = arrayAlter;
+    }
+
+    public ArrayList<Recompensa> getRecompensas() {
+        return Recompensas;
+    }
+
+    public void setRecompensas(ArrayList<Recompensa> recompensas) {
+        Recompensas = recompensas;
+    }
+
+    ArrayList <Recompensa> Recompensas;
 
     public int getSaldo() {
         return saldo;
@@ -258,3 +305,13 @@ class Resposta implements Serializable
     }
 }
 
+class Voto implements Serializable
+{
+    int idVoto;
+    String descricao;
+
+    public Voto(int idVoto, String desc) {
+        this.idVoto = idVoto;
+        this.descricao = desc;
+    }
+}
