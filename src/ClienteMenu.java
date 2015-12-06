@@ -38,7 +38,7 @@ public class ClienteMenu {
                         System.out.println("Login Efectuado com sucesso!");
                         while(login)
                         {
-                            System.out.println("\n\n");
+                            System.out.println("\n");
                             System.out.println("1 - Listar Projectos Actuais");
                             System.out.println("2 - Listar Projectos Antigos");
                             System.out.println("3 - Consultar Saldo");
@@ -431,6 +431,51 @@ public class ClienteMenu {
                                     System.out.println("Corpo da mensagem: ");
                                     String corpoMessage = entrada.nextLine();
                                     p = new Pedido(user, null, "SEND MESSAGE", null);
+                                    p.setAssuntoMessage(assunto);
+                                    p.setCorpoMessage(corpoMessage);
+                                    p.setId_prj(id);
+                                    p.setTipo_mensagem(1);
+                                    lt.send(p);
+
+                                    Resposta rt = lt.receive();
+                                    if (rt.resposta.equals("MESSAGE SUCESS")){
+                                        System.out.println("Mensagem enviada com sucesso!");
+                                    }else{
+                                        System.out.println("Mensagem enviada com insucesso!");
+                                    }
+                                }
+                                case 10:
+                                {
+                                    System.out.println("Quer ver as mensagens relativas a que projecto?");
+                                    int id = entrada.nextInt();
+                                    entrada.nextLine();
+                                    p = new Pedido(user, null, "SEE PROJECT MESSAGES", null);
+                                    p.setId_prj(id);
+                                    lt.send(p);
+
+                                    Resposta r = lt.receive();
+                                    if (r.resposta.equals("SEE MESSAGES")){
+                                        for (int i = 0; i< r.getMensagems().size(); i++ ){
+                                            System.out.println("ID: " + r.getMensagems().get(i).getId_Mensagem() + "------<> ASSUNTO: " +
+                                            r.getMensagems().get(i).getAssunto_Mensagem());
+                                        }
+                                    }
+
+                                    System.out.println("Pretende responder a que mensagem?");
+                                    int id_mensagem = entrada.nextInt();
+                                    entrada.nextLine();
+                                    System.out.println("Qual é o assunto? ");
+                                    String assunto = entrada.nextLine();
+                                    System.out.println("Corpo da mensagem: ");
+                                    String corpoMessage = entrada.nextLine();
+                                    p = new Pedido(user, null, "SEND MESSAGE", null);
+                                    p.setAssuntoMessage(assunto);
+                                    p.setCorpoMessage(corpoMessage);
+                                    p.setId_prj(id);
+                                    p.setId_mensagem(id_mensagem);
+                                    p.setTipo_mensagem(2);
+                                    lt.send(p);
+
                                 }
                                 case 13:
                                 {
@@ -474,6 +519,19 @@ public class ClienteMenu {
 
                                 }
 
+                                case 12:
+                                {
+                                    p = new Pedido(user, null, "SEE PROJECT MESSAGES BY USER", null);
+                                    lt.send(p);
+
+                                    Resposta r = lt.receive();
+                                    for (int i = 0; i< r.getMensagems().size(); i++){
+                                        System.out.println("ID MENSAGEM: " + r.getMensagems().get(i).getId_Mensagem());
+                                        System.out.println("ASSUNTO: " + r.getMensagems().get(i).getAssunto_Mensagem());
+                                        System.out.println("ID PROJECTO: " + r.getMensagems().get(i).getProjecto_idProjecto());
+                                        System.out.println("==========================================");
+                                    }
+                                }
                             }
 
                         }
@@ -553,9 +611,6 @@ public class ClienteMenu {
 
          return r;
      }
-
-
-
  }
 
 class Pedido implements Serializable
@@ -566,12 +621,16 @@ class Pedido implements Serializable
     String name;
     String projectName;
     String DescriptionProject;
-    private String assuntoMessage;
-    private String corpoMessage;
+
+    private int messageSucess;
+    String assuntoMessage;
+    String corpoMessage;
     int id_prj;
     int id_Recompensa;
     int id_Voto;
     int montanteDoar;
+    int id_mensagem;
+    private int tipo_mensagem;
 
     public int getMontanteDoar() {
         return montanteDoar;
@@ -721,6 +780,30 @@ class Pedido implements Serializable
 
     public void setCorpoMessage(String corpoMessage) {
         this.corpoMessage = corpoMessage;
+    }
+
+    public int getMessageSucess() {
+        return messageSucess;
+    }
+
+    public void setMessageSucess(int messageSucess) {
+        this.messageSucess = messageSucess;
+    }
+
+    public int getId_mensagem() {
+        return id_mensagem;
+    }
+
+    public void setId_mensagem(int id_mensagem) {
+        this.id_mensagem = id_mensagem;
+    }
+
+    public int getTipo_mensagem() {
+        return tipo_mensagem;
+    }
+
+    public void setTipo_mensagem(int tipo_mensagem) {
+        this.tipo_mensagem = tipo_mensagem;
     }
 }
 
