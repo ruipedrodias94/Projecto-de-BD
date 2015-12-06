@@ -38,6 +38,7 @@ public class ClienteMenu {
                         System.out.println("Login Efectuado com sucesso!");
                         while(login)
                         {
+                            System.out.println("\n\n");
                             System.out.println("1 - Listar Projectos Actuais");
                             System.out.println("2 - Listar Projectos Antigos");
                             System.out.println("3 - Consultar Saldo");
@@ -46,6 +47,10 @@ public class ClienteMenu {
                             System.out.println("6 - Doar para Projecto");
                             System.out.println("7 - Consultar Detalhes de Projecto");
                             System.out.println("8 - Adicionar / Remover Recompensas a Projecto");
+                            System.out.println("9 - Enviar mensagem Projecto");
+                            System.out.println("10 - Responder mensagem a Cliente");
+                            System.out.println("11 - Ver respostas");
+                            System.out.println("12 - Ver mensagens do Projecto");
 
                             opcao = entrada.nextInt();
                             switch (opcao)
@@ -119,7 +124,6 @@ public class ClienteMenu {
                                         {
                                             System.out.println("Nome de Projecto já existe por favor insira outro:");
                                         }
-
 
                                     }
                                     p = new Pedido(user,null,"NEW PROJECT",null);
@@ -315,8 +319,6 @@ public class ClienteMenu {
                                     Resposta r = lt.receive();
                                     for(int i=0;i<r.getArrProject().size();i++)
                                     {
-
-
                                             String nomeAux = r.getArrProject().get(i).getNome_Projecto();
                                             String descAux = r.getArrProject().get(i).getDescricao_Projecto();
                                             String estadoAux;
@@ -340,6 +342,17 @@ public class ClienteMenu {
                                     break;
                                 }
 
+                                case 9:
+                                {
+                                    System.out.println("Para que projecto deseja mandar uma mensagem?");
+                                    int id = entrada.nextInt();
+                                    entrada.nextLine();
+                                    System.out.println("Qual é o assunto? ");
+                                    String assunto = entrada.nextLine();
+                                    System.out.println("Corpo da mensagem: ");
+                                    String corpoMessage = entrada.nextLine();
+                                    p = new Pedido(user, null, "SEND MESSAGE", null);
+                                }
 
                             }
 
@@ -353,7 +366,6 @@ public class ClienteMenu {
                 }
                 case 2:
                 {
-                    //TODO tentativas de regist
                     System.out.println("Insira o nome:");
                     String nome = entrada.nextLine();
                     System.out.println("Insira o username:");
@@ -434,6 +446,8 @@ class Pedido implements Serializable
     String name;
     String projectName;
     String DescriptionProject;
+    private String assuntoMessage;
+    private String corpoMessage;
     int id_prj;
     int id_Recompensa;
     int id_Voto;
@@ -566,7 +580,6 @@ class Pedido implements Serializable
         this.name = name;
     }
 
-
     public Pedido(String username, String password, String type,String name) {
         this.username = username;
         this.password = password;
@@ -574,6 +587,21 @@ class Pedido implements Serializable
         this.name = name;
     }
 
+    public String getAssuntoMessage() {
+        return assuntoMessage;
+    }
+
+    public void setAssuntoMessage(String assuntoMessage) {
+        this.assuntoMessage = assuntoMessage;
+    }
+
+    public String getCorpoMessage() {
+        return corpoMessage;
+    }
+
+    public void setCorpoMessage(String corpoMessage) {
+        this.corpoMessage = corpoMessage;
+    }
 }
 
 class Recompensa_proj implements Serializable
