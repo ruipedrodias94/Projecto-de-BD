@@ -262,7 +262,20 @@ public class Main {
                     }
                     sc.send_clients(r1,thread_number);
 
-                }
+                }else if(pedido.type.equals("CANCEL PROJECT"))
+                 {
+                     int result = bd.cancelarProjecto(pedido.getId_prj());
+                     Resposta r = new Resposta("");
+                     if(result==1)
+                     {
+                         r = new Resposta("PROJECT NOT CANCELED");
+                     }
+                     else if(result==0)
+                     {
+                         r = new Resposta("PROJECT CANCELED");
+                     }
+                     sc.send_clients(r,thread_number);
+                 }
 
 
              }

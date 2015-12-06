@@ -49,7 +49,7 @@ public class DataBase {
         System.out.println("[DATABASE] Oracle JDBC driver instalada");
 
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "root");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "pass");
         }catch (SQLException e){
             System.out.println("Falhou a fazer a connexao a base de dados!");
             System.out.println(e.getLocalizedMessage());
@@ -121,7 +121,7 @@ public class DataBase {
         int id = 0;
         ArrayList<Projecto> projectosAux = getProjectos();
         for (int i = 0; i < projectosAux.size(); i++){
-            if(projectosAux.get(i).getNome_Projecto() == nomeProjecto){
+            if(projectosAux.get(i).getNome_Projecto().equals(nomeProjecto)){
                 id = projectosAux.get(i).getId_Projecto();
             }
         }
@@ -373,6 +373,7 @@ public class DataBase {
         }
 
         id_Projecto = getIdProjeto(nome_Projecto);
+        System.out.println("ID PROJECT:"+id_Projecto);
 
 
         for(int i=0;i<ARP.size();i++){
@@ -504,7 +505,7 @@ public class DataBase {
                 //Recalcula o valor do Projecto e faz o update
                 valor_Projecto = valor_Projecto + valor;
                 updateSaldoProjecto(id_Projecto, valor_Projecto);
-
+                connection.commit();
 
                 //Cria a doaçaoreturn 0;
 
@@ -512,9 +513,10 @@ public class DataBase {
                 System.out.println("NAO TEM DINHEIRO SUFICIENTE");
                 return 1;
             }
-            connection.commit();
+
         }catch (SQLException e){
             connection.rollback();
+            return 1;
         }
         return 0;
     }
@@ -771,7 +773,7 @@ public class DataBase {
      * @param id_Projecto
      * @throws SQLException
      */
-    public synchronized void cancelarProjecto(int id_Projecto) throws SQLException {
+    public synchronized int cancelarProjecto(int id_Projecto) throws SQLException {
         ArrayList<Doacao> doacoes = getDoacoes(id_Projecto);
         int saldo_Cliente = 0;
         try {
@@ -780,15 +782,18 @@ public class DataBase {
 
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
+            return 1;
         }
 
-        for (int i = 0; i< doacoes.size(); i++){
+        System.out.println("TAMNHO: "+doacoes.size());
+        for (int i = 0; i<doacoes.size(); i++){
             saldo_Cliente = consultarSaldo(doacoes.get(i).getCliente_idCliente());
             saldo_Cliente += doacoes.get(i).getMontante();
             updateSaldoCliente(doacoes.get(i).getCliente_idCliente() , saldo_Cliente);
         }
 
         System.out.println("PROJECTO FOI CANCELADO\nSALDO DO CLIENTE FOI RESTAURADO, OBRIGADO");
+        return 0;
     }
 
     /**

@@ -51,6 +51,7 @@ public class ClienteMenu {
                             System.out.println("10 - Responder mensagem a Cliente");
                             System.out.println("11 - Ver respostas");
                             System.out.println("12 - Ver mensagens do Projecto");
+                            System.out.println("13 - Cancelar Projecto");
 
                             opcao = entrada.nextInt();
                             switch (opcao)
@@ -430,6 +431,47 @@ public class ClienteMenu {
                                     System.out.println("Corpo da mensagem: ");
                                     String corpoMessage = entrada.nextLine();
                                     p = new Pedido(user, null, "SEND MESSAGE", null);
+                                }
+                                case 13:
+                                {
+                                    int idProjecto;
+                                    p = new Pedido(user,null,"GET PROJECTS ID USER",null);
+                                    lt.send(p);
+                                    Resposta r = lt.receive();
+                                    for(int i=0;i<r.getArrProject().size();i++)
+                                    {
+                                        String nomeAux = r.getArrProject().get(i).getNome_Projecto();
+                                        String descAux = r.getArrProject().get(i).getDescricao_Projecto();
+                                        String estadoAux;
+                                        int dinAngAux = r.getArrProject().get(i).getDinheiro_Angariado();
+                                        int dinLimAux = r.getArrProject().get(i).getDinheiro_Limite();
+                                        idProjecto = r.getArrProject().get(i).getId_Projecto();
+                                        if(r.getArrProject().get(i).getEstado()==1)
+                                        {
+                                            estadoAux = "Activo";
+                                        }
+                                        else
+                                        {
+                                            estadoAux="Inactivo";
+                                        }
+                                        System.out.println("ID Projecto: "+idProjecto+" Nome Projecto: "+nomeAux+" Descricao: "+descAux+" Estado: "+estadoAux+" Data Limite: "+r.getArrProject().get(i).getData_Limite()+" Dinheiro Angariado: "+dinAngAux+" Dinheiro Limite: "+dinLimAux+"\n");
+                                    }
+                                    System.out.println("Insira ID do projecto que pretende cancelar: ");
+                                    idProjecto = entrada.nextInt();
+                                    entrada.nextLine();
+                                    p = new Pedido(user,null,"CANCEL PROJECT",null);
+                                    p.setId_prj(idProjecto);
+                                    lt.send(p);
+                                    Resposta ResCanPr = lt.receive();
+                                    if(ResCanPr.resposta.equals("PROJECT NOT CANCELED"))
+                                    {
+                                        System.out.println("ERRO! Projecto nao cancelado");
+                                    }
+                                    else if(ResCanPr.resposta.equals("PROJECT CANCELED"))
+                                    {
+                                        System.out.println("Projecto cancelado com sucesso.");
+                                    }
+
                                 }
 
                             }
