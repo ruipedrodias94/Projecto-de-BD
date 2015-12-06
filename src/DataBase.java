@@ -415,7 +415,7 @@ public class DataBase {
      * @throws SQLException
      */
     //Criar uma recompensa
-    public synchronized void criarRecompensa(String descricao, int montante, int id_Projecto) throws SQLException{
+    public synchronized int criarRecompensa(String descricao, int montante, int id_Projecto) throws SQLException{
         try {
             preparedStatement = connection.prepareStatement(" INSERT INTO proj_bd.recompensa (descricao_Recompensa,montante_Recompensa, Projecto_idProjecto)" +
                     "VALUES (?,?,?);");
@@ -430,7 +430,9 @@ public class DataBase {
 
         } catch (SQLException e) {
             System.out.println(e.getLocalizedMessage());
+            return 1;
         }
+        return 0;
     }
 
     /**
@@ -439,21 +441,24 @@ public class DataBase {
      * E depois disso chamar o metodo getRecompensas e usar o id do projecto escolhido anteriormente
      * @param id_Recompensa
      */
-    public synchronized void deleteRecompensa(int id_Recompensa){
+    public synchronized int deleteRecompensa(int id_Recompensa){
 
         try {
             connection.setAutoCommit(false);
             statement = connection.createStatement();
-            statement.executeUpdate("DELETE FROM proj_bd.recompensa WHERE idRecomensa = " + id_Recompensa + ";");
+            statement.executeUpdate("DELETE FROM proj_bd.recompensa WHERE idRecompensa = " + id_Recompensa + ";");
             connection.commit();
         }catch (SQLException e){
+
             System.out.println(e.getLocalizedMessage());
             try{
                 connection.rollback();
             }catch (SQLException e1){
                 //Ignore
             }
+            return 1;
         }
+        return 0;
     }
 
     /**

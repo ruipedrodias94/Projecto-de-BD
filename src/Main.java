@@ -230,6 +230,39 @@ public class Main {
                     r.setArrProject(bd.getProjectosIDUser(bd.getIdCliente(pedido.getUsername())));
                     sc.send_clients(r,thread_number);
                 }
+                 else if(pedido.type.equals("ADD REWARD"))
+                {
+                    Resposta r = new Resposta("REWARDS ADDED");
+                    for(int i = 0;i< pedido.getArrayRecompensas().size();i++)
+                    {
+                        String descricao;
+                        int montante;
+                        int id_Projecto;
+                        System.out.println("DESCRICAO DA RECOMPENSA: ");
+                        descricao = pedido.getArrayRecompensas().get(i).description;
+                        System.out.println("MONTANTE A PARTIR DO QUAL O CLIENTE RECEBER A RECOMPENSA: ");
+                        montante = pedido.getArrayRecompensas().get(i).montante;
+                        id_Projecto = pedido.getId_prj();
+                        bd.criarRecompensa(descricao, montante, id_Projecto);
+                        for(int j=0;j<pedido.getArrayRecompensas().get(i).alt.size();j++){
+                            System.out.println(pedido.getArrayRecompensas().get(i).alt.get(j).getTipoAlt());
+                            bd.criarVoto(bd.getIdRecompensa(id_Projecto,pedido.getArrayRecompensas().get(i).description),id_Projecto,pedido.getArrayRecompensas().get(i).alt.get(j).getTipoAlt());
+                        }
+                    }
+                    sc.send_clients(r,thread_number);
+                }
+                 else if(pedido.type.equals("REMOVE REWARD"))
+                {
+                    Resposta r1;
+                    if(bd.deleteRecompensa(pedido.getId_Recompensa())==0){
+                    r1 = new Resposta("REWARD REMOVED");
+                    }
+                    else{
+                        r1 = new Resposta("REWARD NOT REMOVED");
+                    }
+                    sc.send_clients(r1,thread_number);
+
+                }
 
 
              }

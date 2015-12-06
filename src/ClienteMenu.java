@@ -310,6 +310,7 @@ public class ClienteMenu {
                                     System.out.println("Pretende:  \n1 - Adicionar Recompensa\n2 - Remover Recompensa");
                                     int opcao1 = entrada.nextInt();
                                     entrada.nextLine();
+                                    int idProjecto;
                                     p = new Pedido(user,null,"GET PROJECTS ID USER",null);
                                     lt.send(p);
                                     Resposta r = lt.receive();
@@ -322,7 +323,7 @@ public class ClienteMenu {
                                             String estadoAux;
                                             int dinAngAux = r.getArrProject().get(i).getDinheiro_Angariado();
                                             int dinLimAux = r.getArrProject().get(i).getDinheiro_Limite();
-                                            int idProjecto = r.getArrProject().get(i).getId_Projecto();
+                                            idProjecto = r.getArrProject().get(i).getId_Projecto();
                                             if(r.getArrProject().get(i).getEstado()==1)
                                             {
                                                 estadoAux = "Activo";
@@ -333,8 +334,85 @@ public class ClienteMenu {
                                             }
                                             System.out.println("ID Projecto: "+idProjecto+" Nome Projecto: "+nomeAux+" Descricao: "+descAux+" Estado: "+estadoAux+" Data Limite: "+r.getArrProject().get(i).getData_Limite()+" Dinheiro Angariado: "+dinAngAux+" Dinheiro Limite: "+dinLimAux+"\n");
                                         }
+                                    idProjecto = entrada.nextInt();
+                                    entrada.nextLine();
                                     if(opcao1==1)
                                     {
+                                        p = new Pedido(user,null,"ADD REWARD",null);
+                                        System.out.println("Quantas Recompensas pretende adicionar ao projecto?");
+                                        int rec = entrada.nextInt();
+                                        entrada.nextLine();
+                                        while(rec>0)
+                                        {
+
+                                            System.out.println("Insira uma descrição da Recompensa:");
+                                            String desc_aux = entrada.nextLine();
+                                            System.out.println("A partir de que montante quer que a recompensa seja oferecida?");
+                                            int mont_aux = entrada.nextInt();
+                                            entrada.nextLine();
+                                            System.out.println("Pretende que a recompensa tenha alternativas? Sim - s; Não - n");
+                                            String altB = entrada.nextLine();
+                                            ArrayList <Alternativa> aA = new ArrayList<>();
+                                            if(altB.equals("s"))
+                                            {
+                                                System.out.println("Quantas?");
+                                                int qtdAlt = entrada.nextInt();
+                                                entrada.nextLine();
+                                                while(qtdAlt>0)
+                                                {
+                                                    System.out.println("Insira uma descrição da alternativa:");
+                                                    Alternativa a = new Alternativa();
+                                                    a.setTipoAlt(entrada.nextLine());
+                                                    aA.add(a);
+                                                    qtdAlt--;
+
+                                                }
+
+                                            }
+                                            Recompensa_proj rP = new Recompensa_proj(desc_aux,mont_aux);
+                                            rP.setAlt(aA);
+                                            p.getArrayRecompensas().add(rP);
+                                            p.setId_prj(idProjecto);
+                                            rec--;
+
+                                        }
+                                        lt.send(p);
+                                        Resposta RewAns = lt.receive();
+                                        if(RewAns.resposta.equals("REWARDS ADDED"))
+                                        {
+                                            System.out.println("Recompensa(s) adicionada(s) com sucesso");
+                                        }
+
+                                    }
+                                    else if(opcao1==2)
+                                    {
+
+
+                                        System.out.println(idProjecto);
+                                        p = new Pedido(user,null,"LIST REWARDS PROJECT",null);
+                                        p.setId_prj(idProjecto);
+                                        lt.send(p);
+                                        r = lt.receive();
+                                        System.out.println("Recompensas relativas ao projecto:");
+                                        for(int i = 0;i<r.getRecompensas().size();i++)
+                                        {
+
+                                                System.out.println("ID: "+r.getRecompensas().get(i).getId_Recompensa()+" "+"Descriçao: "+r.getRecompensas().get(i).getDescricao_Recompensa()+" Montante Necessario: "+r.getRecompensas().get(i).getMontante_Recompensa());
+                                        }
+                                        System.out.println("Insira o ID da recompensa que pretende eliminar:");
+                                        int id_recompensa = entrada.nextInt();
+                                        p = new Pedido(user,null,"REMOVE REWARD",null);
+                                        p.setId_Recompensa(id_recompensa);
+                                        lt.send(p);
+                                        r = lt.receive();
+                                        if(r.resposta.equals("REWARD REMOVED"))
+                                        {
+                                            System.out.println("Recompensa removida com sucesso");
+                                        }
+                                        else if(r.resposta.equals("REWARD REMOVED"))
+                                        {
+                                            System.out.println("ERRO! Recompensa nao removida.");
+                                        }
 
                                     }
                                     break;
