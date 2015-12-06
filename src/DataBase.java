@@ -441,20 +441,11 @@ public class DataBase {
      * @throws SQLException
      */
     //Listar detalhes do projecto
-    public synchronized String listarDetalhes_Projecto(int id_Projecto) throws SQLException{
+    public synchronized ArrayList<Projecto>  listarDetalhes_Projecto(int id_Projecto) throws SQLException{
         String string_Final = "";
         ArrayList<Projecto> projectosAux = getProjectos();
-        for (int i = 0; i < projectosAux.size(); i++){
-            if(projectosAux.get(i).getId_Projecto() == id_Projecto){
-                string_Final = "DETALHES DO PROJECTO: \n"
-                        + "NOME: " + projectosAux.get(i).getNome_Projecto() + "\n"
-                        + "DESCRICAO: " + projectosAux.get(i).getDescricao_Projecto() + "\n"
-                        + "DATA LIMITE: " + String.valueOf(projectosAux.get(i).getData_Limite()) + "\n"
-                        + "DINHEIRO ANGARIADO: " + String.valueOf(projectosAux.get(i).getDinheiro_Angariado()) + "\n"
-                        + "DINHEIRO NECESSARIO: " + String.valueOf(projectosAux.get(i).getDinheiro_Limite())
-                        + "\n====================================================";            }
-        }
-        return string_Final;
+
+        return projectosAux;
     }
 
 

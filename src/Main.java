@@ -218,6 +218,12 @@ public class Main {
                     rspRew.setRecompensas(bd.getRecompensasIDCliente(id_cliente));
                     sc.send_clients(rspRew,thread_number);
                 }
+                 else if(pedido.type.equals("LIST PROJECT DETAILS"))
+                {
+                    Resposta r = new Resposta("PROJECT DETAILS");
+                    r.setArrProject(bd.listarDetalhes_Projecto(pedido.getId_prj()));
+                    sc.send_clients(r,thread_number);
+                }
 
 
              }
@@ -271,6 +277,15 @@ class Resposta implements Serializable
  String resposta;
     int saldo;
     ArrayList <Voto> arrayAlter;
+    ArrayList <Projecto> ArrProject;
+
+    public ArrayList<Projecto> getArrProject() {
+        return ArrProject;
+    }
+
+    public void setArrProject(ArrayList<Projecto> arrProject) {
+        ArrProject = arrProject;
+    }
 
     public ArrayList<Voto> getArrayAlter() {
         return arrayAlter;

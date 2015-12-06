@@ -1,9 +1,10 @@
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by Rui Dias on 30/11/2015.
  */
-public class Projecto {
+public class Projecto implements Serializable {
 
     private int id_Projecto;
     private String nome_Projecto;

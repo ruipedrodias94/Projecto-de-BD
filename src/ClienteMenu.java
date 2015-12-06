@@ -45,6 +45,8 @@ public class ClienteMenu {
                             System.out.println("4 - Consultar Recompensas");
                             System.out.println("5 - Criar Projecto");
                             System.out.println("6 - Doar para Projecto");
+                            System.out.println("7 - Consultar Detalhes de Projecto");
+
                             opcao = entrada.nextInt();
                             switch (opcao)
                             {
@@ -259,6 +261,48 @@ public class ClienteMenu {
                                     }
                                     break;
 
+
+                                }
+                                case 7:
+                                {
+                                    p = new Pedido(null,null,"LIST ALL PROJECTS",null);
+                                    lt.send(p);
+                                    Resposta r = lt.receive();
+                                    System.out.println("Projectos a que pode fazer doação: \n");
+                                    if(r.Projects.size()==0)
+                                    {
+                                        System.out.println("Sem Projectos Activos para Apresentar");
+                                    }
+                                    else {
+                                        for (int i = 0; i < r.Projects.size(); i++) {
+                                            System.out.println(r.Projects.get(i));
+                                        }
+                                    }
+                                    System.out.println("Insira o ID do projecto que pretende saber os detalhes");
+                                    int id_projecto = entrada.nextInt();
+                                    entrada.nextLine();
+                                    p = new Pedido(null,null,"LIST PROJECT DETAILS",null);
+                                    p.setId_prj(id_projecto);
+                                    lt.send(p);
+                                    r = lt.receive();
+                                    for(int i=0;i<r.getArrProject().size();i++)
+                                    {
+                                        if(r.getArrProject().get(i).getId_Projecto() == id_projecto){
+                                        String nomeAux = r.getArrProject().get(i).getNome_Projecto();
+                                        String descAux = r.getArrProject().get(i).getDescricao_Projecto();
+                                        String estadoAux;
+                                        int dinAngAux = r.getArrProject().get(i).getDinheiro_Angariado();
+                                        int dinLimAux = r.getArrProject().get(i).getDinheiro_Limite();
+                                        if(r.getArrProject().get(i).getEstado()==1)
+                                        {
+                                            estadoAux = "Activo";
+                                        }
+                                        else
+                                        {
+                                            estadoAux="Inactivo";
+                                        }
+                                        System.out.println("Nome Projecto: "+nomeAux+" Descricao: "+descAux+" Estado: "+estadoAux+" Data Limite: "+r.getArrProject().get(i).getData_Limite()+" Dinheiro Angariado: "+dinAngAux+" Dinheiro Limite: "+dinLimAux+"\n");
+                                    }}
 
                                 }
 
