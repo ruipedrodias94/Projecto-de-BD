@@ -116,6 +116,22 @@ public class DataBase {
         return id;
     }
 
+    public synchronized int getIdRecompensa(int IdProjecto,String descrRecompensa) throws SQLException{
+        int id = 0;
+        try{
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("SELECT * FROM proj_bd.recompensa WHERE Projecto_idProjecto = '" + IdProjecto + "' AND descricao_Recompensa='"+descrRecompensa+"';");
+            while (resultSet.next()){
+                id = resultSet.getInt(1);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+
+
     /**
      * Metodo para registar um cliente
      * @param nome_Cliente
@@ -333,13 +349,16 @@ public class DataBase {
         id_Projecto = getIdProjeto(nome_Projecto);
 
 
-
         for(int i=0;i<ARP.size();i++){
             System.out.println("DESCRICAO DA RECOMPENSA: ");
             descricao = ARP.get(i).description;
             System.out.println("MONTANTE A PARTIR DO QUAL O CLIENTE RECEBER A RECOMPENSA: ");
             montante = ARP.get(i).montante;
             criarRecompensa(descricao, montante, id_Projecto);
+            for(int j=0;j<ARP.get(i).alt.size();j++){
+                System.out.println(ARP.get(i).alt.get(j).getTipoAlt());
+                criarVoto(getIdRecompensa(id_Projecto,ARP.get(i).description),id_Projecto,ARP.get(i).alt.get(j).getTipoAlt());
+            }
 
         }
 
@@ -460,7 +479,7 @@ public class DataBase {
             System.out.println("EM QUE RECOMPENSA VAI VOTAR?");
             id_Recompensa = sc.nextInt();
             //Cria o voto
-            criarVoto(id_Recompensa, id_Projecto);
+            //criarVoto(id_Recompensa, id_Projecto);
 
             //Recalcula o valor do cliente e faz o update
             valor_Cliente = valor_Cliente - valor;
@@ -567,13 +586,15 @@ public class DataBase {
      * @throws SQLException
      */
     //Criar voto
-    public synchronized void criarVoto(int id_Recompensa, int id_Projecto) throws SQLException{
+    public synchronized void criarVoto(int id_Recompensa, int id_Projecto, String descricao) throws SQLException{
         try {
 
-            preparedStatement = connection.prepareStatement(" INSERT INTO proj_bd.voto (id_Recompensa,Projecto_idProjecto)" +
-                    "VALUES (?,?);");
+            preparedStatement = connection.prepareStatement(" INSERT INTO proj_bd.voto (id_Recompensa,Projecto_idProjecto,num_Votos,descricao)" +
+                    "VALUES (?,?,?,'"+descricao+"');");
             preparedStatement.setInt(1, id_Recompensa);
             preparedStatement.setInt(2, id_Projecto);
+            preparedStatement.setInt(3, 0);
+
 
             preparedStatement.executeUpdate();
 
@@ -588,7 +609,6 @@ public class DataBase {
     //Exemplo 1
     public synchronized void criarDoacao(int montante, int id_Recompensa,int id_Voto, int id_Cliente,  int id_Projecto) throws SQLException{
         try {
-
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(" INSERT INTO proj_bd.doacao (montante,Recompensa_idRecompensa,Voto_idVoto , Cliente_idCliente,Projecto_idProjecto)" +
                     "VALUES (?,?,?,?,?);");

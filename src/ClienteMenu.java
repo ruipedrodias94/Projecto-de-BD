@@ -90,7 +90,7 @@ public class ClienteMenu {
 
                                     break;
                                 }
-                                case 5:
+                                case 5:{
                                     String nomeProj;
                                     while(true)
                                     {
@@ -125,16 +125,39 @@ public class ClienteMenu {
                                     p.setLimit_cash(entrada.nextInt());
                                     System.out.println("Quantas Recompensas pretende adicionar ao projecto?");
                                     int rec = entrada.nextInt();
+                                    entrada.nextLine();
                                     while(rec>0)
                                     {
-                                        entrada.nextLine();
-                                        System.out.println("Insira uma descição da Recompensa:");
+
+                                        System.out.println("Insira uma descrição da Recompensa:");
                                         String desc_aux = entrada.nextLine();
                                         System.out.println("A partir de que montante quer que a recompensa seja oferecida?");
                                         int mont_aux = entrada.nextInt();
+                                        entrada.nextLine();
+                                        System.out.println("Pretende que a recompensa tenha alternativas? Sim - s; Não - n");
+                                        String altB = entrada.nextLine();
+                                        ArrayList <Alternativa> aA = new ArrayList<>();
+                                        if(altB.equals("s"))
+                                        {
+                                            System.out.println("Quantas?");
+                                            int qtdAlt = entrada.nextInt();
+                                            entrada.nextLine();
+                                            while(qtdAlt>0)
+                                            {
+                                                System.out.println("Insira uma descrição da alternativa:");
+                                                Alternativa a = new Alternativa();
+                                                a.setTipoAlt(entrada.nextLine());
+                                                aA.add(a);
+                                                qtdAlt--;
+
+                                            }
+
+                                        }
                                         Recompensa_proj rP = new Recompensa_proj(desc_aux,mont_aux);
+                                        rP.setAlt(aA);
                                         p.getArrayRecompensas().add(rP);
                                         rec--;
+
                                     }
                                     lt.send(p);
                                     Resposta r = lt.receive();
@@ -143,6 +166,27 @@ public class ClienteMenu {
                                         System.out.println("Projecto Criado Com Sucesso!\n");
                                     }
                                     break;
+                                }
+                                case 6:{
+                                    //Lista Projectos a que se pode fazer pledge
+                                    p = new Pedido(null,null,"LIST ALL PROJECTS",null);
+                                    lt.send(p);
+                                    Resposta r = lt.receive();
+                                    System.out.println("Projectos a que pode fazer doação: \n");
+                                    if(r.Projects.size()==0)
+                                    {
+                                        System.out.println("Sem Projectos Activos para Apresentar");
+                                    }
+                                    else {
+                                        for (int i = 0; i < r.Projects.size(); i++) {
+                                            System.out.println(r.Projects.get(i));
+                                        }
+                                    }
+                                    System.out.println("Insira o ID do projecto a que pretende fazer doação:");
+                                    int ID_PROJ = entrada.nextInt();
+                                    break;
+
+                                }
 
 
                             }
@@ -347,6 +391,15 @@ class Recompensa_proj implements Serializable
 {
     String description;
     int montante;
+    ArrayList <Alternativa> alt = new ArrayList<>();
+
+    public ArrayList<Alternativa> getAlt() {
+        return alt;
+    }
+
+    public void setAlt(ArrayList<Alternativa> alt) {
+        this.alt = alt;
+    }
 
     public Recompensa_proj(String description, int montante) {
         this.description = description;
@@ -354,3 +407,15 @@ class Recompensa_proj implements Serializable
     }
 }
 
+class Alternativa implements Serializable
+{
+    String TipoAlt;
+
+    public String getTipoAlt() {
+        return TipoAlt;
+    }
+
+    public void setTipoAlt(String tipoAlt) {
+        TipoAlt = tipoAlt;
+    }
+}
