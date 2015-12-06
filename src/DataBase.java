@@ -49,7 +49,7 @@ public class DataBase {
         System.out.println("[DATABASE] Oracle JDBC driver instalada");
 
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "pass");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "root");
         }catch (SQLException e){
             System.out.println("Falhou a fazer a connexao a base de dados!");
             System.out.println(e.getLocalizedMessage());
@@ -322,7 +322,7 @@ public class DataBase {
      */
     //Criar um projecto
     public synchronized String criarProjecto(String nome_Projecto, String desricao_Projecto, String data,
-                                           int id_Cliente, int dinheiro_Limite,ArrayList<Recompensa_proj> ARP ) throws  SQLException{
+                                             int id_Cliente, int dinheiro_Limite,ArrayList<Recompensa_proj> ARP ) throws  SQLException{
         //Saldo = 0
         //Estado = 1 ---> Activo
         //Data limite ---> Ainda nao sei
@@ -377,7 +377,7 @@ public class DataBase {
 
         }
 
-       // System.out.println("POR FIM UMA RECOMPENSA DEFAULT ----> MONTANTE = 0 \nDESCRICAO DA RECOMPENSA: ");
+        // System.out.println("POR FIM UMA RECOMPENSA DEFAULT ----> MONTANTE = 0 \nDESCRICAO DA RECOMPENSA: ");
 
         //criarRecompensa(descricao, 0, id_Projecto);
         return r;
@@ -468,37 +468,39 @@ public class DataBase {
         valor_Cliente = consultarSaldo(id_Cliente);
         valor_Projecto = consultarSaldoProjecto(id_Projecto);
 
-        if(valor_Cliente > valor){
-            //Continua
-            System.out.println("DE ACORDO COM O VALOR QUE QUER DOAR, ESTAS SAO AS RECOMPENSAS DISPONIVEIS PARA VOTAR. " +
-                    "ATENCAO QUE A RECOMPENSA EM QUE VOTAR VAI SER A QUE LHE VAI FICAR ATRIBUIDA");
+        try {
+            connection.setAutoCommit(false);
+            if (valor_Cliente > valor) {
+                //Continua
+                System.out.println("DE ACORDO COM O VALOR QUE QUER DOAR, ESTAS SAO AS RECOMPENSAS DISPONIVEIS PARA VOTAR. " +
+                        "ATENCAO QUE A RECOMPENSA EM QUE VOTAR VAI SER A QUE LHE VAI FICAR ATRIBUIDA");
+
+                criarDoacao(valor, id_Recompensa, id_voto, id_Cliente, id_Projecto);
+
+                //Cria o voto
+                //criarVoto(id_Recompensa, id_Projecto);
+                VotoAlternativa(id_voto);
+
+                //Recalcula o valor do cliente e faz o update
+                valor_Cliente = valor_Cliente - valor;
+                updateSaldoCliente(id_Cliente, valor_Cliente);
+
+                //Recalcula o valor do Projecto e faz o update
+                valor_Projecto = valor_Projecto + valor;
+                updateSaldoProjecto(id_Projecto, valor_Projecto);
 
 
+                //Cria a doaçaoreturn 0;
 
-
-            //Cria o voto
-            //criarVoto(id_Recompensa, id_Projecto);
-            VotoAlternativa(id_voto);
-
-            //Recalcula o valor do cliente e faz o update
-            valor_Cliente = valor_Cliente - valor;
-            updateSaldoCliente(id_Cliente, valor_Cliente);
-
-            //Recalcula o valor do Projecto e faz o update
-            valor_Projecto = valor_Projecto + valor;
-            updateSaldoProjecto(id_Projecto, valor_Projecto);
-
-
-
-            //Cria a doaçao
-            criarDoacao(valor, id_Recompensa, id_voto, id_Cliente, id_Projecto);
-            return 0;
-
-        }else{
-            System.out.println("NAO TEM DINHEIRO SUFICIENTE");
-            return 1;
+            } else {
+                System.out.println("NAO TEM DINHEIRO SUFICIENTE");
+                return 1;
+            }
+            connection.commit();
+        }catch (SQLException e){
+            connection.rollback();
         }
-
+        return 0;
     }
 
     public synchronized void VotoAlternativa(int id_Voto) throws SQLException{
@@ -615,18 +617,18 @@ public class DataBase {
         }
 
         for(int i =0;i<DoacoesAux.size();i++){
-        try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(" SELECT idRecompensa ,descricao_Recompensa, montante_Recompensa, Projecto_idProjecto" +
-                    " FROM proj_bd.recompensa WHERE idRecompensa='"+DoacoesAux.get(i).getRecompensa_idRecompensa()+"';");
+            try {
+                statement = connection.createStatement();
+                resultSet = statement.executeQuery(" SELECT idRecompensa ,descricao_Recompensa, montante_Recompensa, Projecto_idProjecto" +
+                        " FROM proj_bd.recompensa WHERE idRecompensa='"+DoacoesAux.get(i).getRecompensa_idRecompensa()+"';");
 
-            while (resultSet.next()){
-                recompensa = new Recompensa(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4));
-                recompensasAux.add(recompensa);
+                while (resultSet.next()){
+                    recompensa = new Recompensa(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4));
+                    recompensasAux.add(recompensa);
+                }
+            }catch (SQLException e){
+                System.out.println(e.getLocalizedMessage());
             }
-        }catch (SQLException e){
-            System.out.println(e.getLocalizedMessage());
-        }
         }
         return recompensasAux;
 

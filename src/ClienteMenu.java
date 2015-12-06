@@ -1,6 +1,4 @@
-import com.sun.tools.doclets.formats.html.SourceToHTMLConverter;
 
-import javax.sound.midi.Soundbank;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -27,9 +25,9 @@ public class ClienteMenu {
                 case 1:
                 {
                     System.out.println("Insira o username:");
-                    String user = entrada.next();
+                    String user = entrada.nextLine();
                     System.out.println("Insira password:");
-                    String pass = entrada.next();
+                    String pass = entrada.nextLine();
                     Pedido p = new Pedido(user,pass,"LOGIN","name");
                     lt.send(p);
                     Resposta response = lt.receive();
@@ -321,11 +319,11 @@ public class ClienteMenu {
                 {
                     //TODO tentativas de regist
                     System.out.println("Insira o nome:");
-                    String nome = entrada.next();
+                    String nome = entrada.nextLine();
                     System.out.println("Insira o username:");
-                    String user = entrada.next();
+                    String user = entrada.nextLine();
                     System.out.println("Insira password:");
-                    String pass = entrada.next();
+                    String pass = entrada.nextLine();
                     Pedido pedido = new Pedido(user,pass,"REGISTRY",nome);
                     lt.send(pedido);
                     Resposta response = lt.receive();
