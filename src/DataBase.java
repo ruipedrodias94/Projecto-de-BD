@@ -49,7 +49,7 @@ public class DataBase {
         System.out.println("[DATABASE] Oracle JDBC driver instalada");
 
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "pass");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "root");
         }catch (SQLException e){
             System.out.println("Falhou a fazer a connexao a base de dados!");
             System.out.println(e.getLocalizedMessage());
@@ -119,14 +119,11 @@ public class DataBase {
     //Get o id do projecto
     public synchronized int getIdProjeto(String nomeProjecto) throws SQLException{
         int id = 0;
-        try{
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM proj_bd.projecto WHERE nome_Projecto = '" + nomeProjecto + "';");
-            while (resultSet.next()){
-                id = resultSet.getInt(1);
+        ArrayList<Projecto> projectosAux = getProjectos();
+        for (int i = 0; i < projectosAux.size(); i++){
+            if(projectosAux.get(i).getNome_Projecto() == nomeProjecto){
+                id = projectosAux.get(i).getId_Projecto();
             }
-        }catch (SQLException e){
-            e.printStackTrace();
         }
         return id;
     }
@@ -144,9 +141,7 @@ public class DataBase {
         }
         return id;
     }
-
-
-
+    
     /**
      * Metodo para registar um cliente
      * @param nome_Cliente
@@ -250,27 +245,21 @@ public class DataBase {
         return aux;
     }
 
+    /**
+     * Metodo que retornar um arraylist de projectos de cada utilizador
+     * @param userId
+     * @return
+     */
     public synchronized ArrayList<Projecto> getProjectosIDUser(int userId){
-        ArrayList<Projecto> aux = new ArrayList<>();
-        Projecto projectoAux;
-        try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT idProjecto, nome_Projecto, descricao_Projecto, estado, data_Limite, dinheiro_Angariado, dinheiro_Limite, Cliente_idCliente" +
-                    " FROM proj_bd.projecto WHERE Cliente_idCliente = "+userId+";");
-
-            while (resultSet.next()){
-                projectoAux = new Projecto(resultSet.getInt(1),resultSet.getString(2), resultSet.getString(3), resultSet.getInt(4), resultSet.getDate(5), resultSet.getInt(6),
-                        resultSet.getInt(7), resultSet.getInt(8));
-
-                aux.add(projectoAux);
+        ArrayList<Projecto> projectosAux = getProjectos();
+        ArrayList<Projecto> projectosUser = new ArrayList<>();
+        for (int i = 0; i < projectosAux.size(); i++){
+            if(projectosAux.get(i).getCliente_idCliente() == userId){
+                projectosUser.add(projectosAux.get(i));
             }
-        }catch (SQLException e){
-            System.out.println(e.getLocalizedMessage());
         }
-        return aux;
+        return projectosUser;
     }
-
-
 
     /**
      * Metodo que lista um arraylist de strings que lista os projectos de acordo com o seu estado. state = 0, projecto acabado
