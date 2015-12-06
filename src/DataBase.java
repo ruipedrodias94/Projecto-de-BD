@@ -49,7 +49,7 @@ public class DataBase {
         System.out.println("[DATABASE] Oracle JDBC driver instalada");
 
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "root");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "pass");
         }catch (SQLException e){
             System.out.println("Falhou a fazer a connexao a base de dados!");
             System.out.println(e.getLocalizedMessage());
@@ -249,6 +249,28 @@ public class DataBase {
         }
         return aux;
     }
+
+    public synchronized ArrayList<Projecto> getProjectosIDUser(int userId){
+        ArrayList<Projecto> aux = new ArrayList<>();
+        Projecto projectoAux;
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("SELECT idProjecto, nome_Projecto, descricao_Projecto, estado, data_Limite, dinheiro_Angariado, dinheiro_Limite, Cliente_idCliente" +
+                    " FROM proj_bd.projecto WHERE Cliente_idCliente = "+userId+";");
+
+            while (resultSet.next()){
+                projectoAux = new Projecto(resultSet.getInt(1),resultSet.getString(2), resultSet.getString(3), resultSet.getInt(4), resultSet.getDate(5), resultSet.getInt(6),
+                        resultSet.getInt(7), resultSet.getInt(8));
+
+                aux.add(projectoAux);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return aux;
+    }
+
+
 
     /**
      * Metodo que lista um arraylist de strings que lista os projectos de acordo com o seu estado. state = 0, projecto acabado

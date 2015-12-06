@@ -224,6 +224,12 @@ public class Main {
                     r.setArrProject(bd.listarDetalhes_Projecto(pedido.getId_prj()));
                     sc.send_clients(r,thread_number);
                 }
+                 else if(pedido.type.equals("GET PROJECTS ID USER"))
+                {
+                    Resposta r = new Resposta("USER PROJECTS");
+                    r.setArrProject(bd.getProjectosIDUser(bd.getIdCliente(pedido.getUsername())));
+                    sc.send_clients(r,thread_number);
+                }
 
 
              }
