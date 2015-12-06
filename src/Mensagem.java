@@ -1,9 +1,10 @@
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by Rui Dias on 05/12/2015.
  */
-public class Mensagem {
+public class Mensagem implements Serializable {
 
     private int id_Mensagem;
     private String assunto_Mensagem;
