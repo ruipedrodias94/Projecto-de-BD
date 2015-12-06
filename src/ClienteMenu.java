@@ -90,6 +90,14 @@ public class ClienteMenu {
                                 }
                                 case 4:
                                 {
+                                    p = new Pedido(user,null,"GET REWARDS",null);
+                                    lt.send(p);
+                                    Resposta r = lt.receive();
+                                    System.out.println("As recompensas que tem direito neste momento são:");
+                                    for(int i=0;i<r.getRecompensas().size();i++)
+                                    {
+                                        System.out.println("ID Recompensa: "+r.getRecompensas().get(i).getId_Recompensa()+" Descricao: "+r.getRecompensas().get(i).getDescricao_Recompensa());
+                                    }
 
                                     break;
                                 }
@@ -249,7 +257,6 @@ public class ClienteMenu {
                                     {
                                         System.out.println("Erro! doacao nao concluida!");
                                     }
-
                                     break;
 
 

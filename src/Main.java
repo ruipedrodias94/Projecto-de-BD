@@ -210,6 +210,14 @@ public class Main {
                         sc.send_clients(rspDoa,thread_number);
                     }
                 }
+                else if(pedido.type.equals("GET REWARDS"))
+                {
+                    Resposta rspRew;
+                    rspRew = new Resposta("REWARDS GETTED");
+                    int id_cliente = bd.getIdCliente(pedido.getUsername());
+                    rspRew.setRecompensas(bd.getRecompensasIDCliente(id_cliente));
+                    sc.send_clients(rspRew,thread_number);
+                }
 
 
              }

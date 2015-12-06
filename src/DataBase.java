@@ -604,6 +604,43 @@ public class DataBase {
 
     }
 
+    public synchronized ArrayList<Recompensa> getRecompensasIDCliente(int IDCliente) throws SQLException {
+        ArrayList<Doacao> DoacoesAux = new ArrayList<>();
+        ArrayList<Recompensa> recompensasAux = new ArrayList<>();
+        Recompensa recompensa;
+        Doacao d;
+
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(" SELECT idDoacao ,montante, Recompensa_idRecompensa, Voto_idVoto,Cliente_idCliente, Projecto_idProjecto" +
+                    " FROM proj_bd.doacao WHERE Cliente_idCliente='"+IDCliente+"';");
+
+            while (resultSet.next()){
+                d = new Doacao(resultSet.getInt(1), resultSet.getInt(2), resultSet.getInt(3), resultSet.getInt(4),resultSet.getInt(5),resultSet.getInt(6));
+                DoacoesAux.add(d);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+
+        for(int i =0;i<DoacoesAux.size();i++){
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(" SELECT idRecompensa ,descricao_Recompensa, montante_Recompensa, Projecto_idProjecto" +
+                    " FROM proj_bd.recompensa WHERE idRecompensa='"+DoacoesAux.get(i).getRecompensa_idRecompensa()+"';");
+
+            while (resultSet.next()){
+                recompensa = new Recompensa(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4));
+                recompensasAux.add(recompensa);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        }
+        return recompensasAux;
+
+    }
+
     /**
      * Metodo que retorna um arraylist das recompensas de cada utilizador
      * Atenção que depois esta parte vai ser feita no menu. Listar as recompensas de utilizador, ou listar as recompensas
