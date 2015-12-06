@@ -873,37 +873,40 @@ public class DataBase {
      * @param assunto
      * @param descricao
      */
-    private synchronized void sendMessage(int id_Cliente, int id_Projecto, String assunto, String descricao, int tipo){
+    public synchronized int sendMessage(int id_Cliente, int id_Projecto, String assunto, String descricao, int tipo){
         Date data = new Date();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         String dataString = df.format(data);
         try{
             connection.setAutoCommit(false);
             statement = connection.createStatement();
             statement.executeUpdate("INSERT INTO proj_bd.mensagem (assunto_Mensagem, conteudo_Mensagem, data_Mensagem, tipo_Mensagem, Projecto_idProjecto, Cliente_idCliente) " +
-                    "VALUES (" + assunto + ","+ descricao +","+ java.sql.Date.valueOf(dataString)+", "+ tipo +", "+ id_Projecto + "," + id_Cliente +");");
+                    "VALUES ('" + assunto + "','"+ descricao +"','"+ java.sql.Date.valueOf(dataString) +"', "+ tipo +", "+ id_Projecto + "," + id_Cliente +");");
             connection.commit();
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
             try{
                 connection.rollback();
+                return 0;
             }catch (SQLException e1){
                 //Ignore
             }
         }
+        return 1;
     }
 
     /**
      * Metodo para termos todas as mensagens, o resto e feito no menu
      * @return
      */
-    private synchronized ArrayList<Mensagem> getMessages(){
+    public synchronized ArrayList<Mensagem> getMessages(int id_User){
         ArrayList<Mensagem> mensagens = new ArrayList<>();
         Mensagem mensagemAux;
         try {
             statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT idMensagem, assunto_Mensagem, conteudo_Mensagem, data_Mensagem, tipo_Mensagem, Projecto_idProjecto, Cliente_idCliente" +
-                    " FROM proj_bd.mensagem");
+            resultSet = statement.executeQuery("SELECT idMensagem, assunto_Mensagem, conteudo_Mensagem, data_Mensagem, tipo_Mensagem, mensagem.Projecto_idProjecto, mensagem.Cliente_idCliente" +
+                    " FROM proj_bd.mensagem, proj_bd.cliente, proj_bd.projecto WHERE cliente.idCliente = mensagem.Cliente_idCliente \n" +
+                    "AND projecto.idProjecto = mensagem.Projecto_idProjecto AND cliente.idCliente = "+ id_User + ";");
             while (resultSet.next()){
                 mensagemAux = new Mensagem(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getDate(4), resultSet.getInt(5),resultSet.getInt(6), resultSet.getInt(7));
                 mensagens.add(mensagemAux);
@@ -914,7 +917,6 @@ public class DataBase {
 
         return mensagens;
     }
-
 
 
 }

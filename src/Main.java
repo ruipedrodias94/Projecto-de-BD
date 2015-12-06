@@ -87,32 +87,32 @@ public class Main {
         //dataBase.finalizarProjectos();
     }
 }
- class Connection extends Thread
- {
-     int thread_number;
-     InputStream is;
-     ObjectInputStream ois;
-     Socket ClientSocket;
-     DataBase bd;
-     Shared_Clients sc = new Shared_Clients();
+class Connection extends Thread
+{
+    int thread_number;
+    InputStream is;
+    ObjectInputStream ois;
+    Socket ClientSocket;
+    DataBase bd;
+    Shared_Clients sc = new Shared_Clients();
 
-     public Connection (Socket aClientSocket, int numero, DataBase BD) throws IOException {
-         bd = BD;
-         thread_number = numero;
-         ClientSocket = aClientSocket;
-         sc.addClient(ClientSocket);
-         this.start();
-     }
+    public Connection (Socket aClientSocket, int numero, DataBase BD) throws IOException {
+        bd = BD;
+        thread_number = numero;
+        ClientSocket = aClientSocket;
+        sc.addClient(ClientSocket);
+        this.start();
+    }
 
-     public void run()
-     {
-         try {
-             while(true) {
-                 //Aqui que se vai fazer o tratamento dos pedidos
-                 ois = new ObjectInputStream(ClientSocket.getInputStream());
-                 //Chegada de mensagem ---> Tratamento
+    public void run()
+    {
+        try {
+            while(true) {
+                //Aqui que se vai fazer o tratamento dos pedidos
+                ois = new ObjectInputStream(ClientSocket.getInputStream());
+                //Chegada de mensagem ---> Tratamento
 
-                 Pedido pedido= (Pedido) ois.readObject();
+                Pedido pedido= (Pedido) ois.readObject();
 
                 if(pedido.type.equals("LOGIN"))
                 {
@@ -126,25 +126,25 @@ public class Main {
                         sc.send_clients(respostaLog,thread_number);
                     }
                 }
-                 else if(pedido.type.equals("REGISTRY"))
-                 {
-                     int saldo_inicial = 100;
-                     if(bd.registarConta(pedido.name,pedido.username,pedido.password,saldo_inicial)==0)
-                     {
-                         Resposta respostaReg = new Resposta("REGISTRY SUCCESS");
-                         sc.send_clients(respostaReg,thread_number);
-                     }
-                     else if(bd.registarConta(pedido.name,pedido.username,pedido.password,saldo_inicial)==1)
-                     {
-                         Resposta respostaReg = new Resposta("REGISTRY INSUCCESS");
-                         sc.send_clients(respostaReg,thread_number);
+                else if(pedido.type.equals("REGISTRY"))
+                {
+                    int saldo_inicial = 100;
+                    if(bd.registarConta(pedido.name,pedido.username,pedido.password,saldo_inicial)==0)
+                    {
+                        Resposta respostaReg = new Resposta("REGISTRY SUCCESS");
+                        sc.send_clients(respostaReg,thread_number);
+                    }
+                    else if(bd.registarConta(pedido.name,pedido.username,pedido.password,saldo_inicial)==1)
+                    {
+                        Resposta respostaReg = new Resposta("REGISTRY INSUCCESS");
+                        sc.send_clients(respostaReg,thread_number);
 
-                     }
-                 }
-                 else if(pedido.type.equals("LIST ALL PROJECTS"))
+                    }
+                }
+                else if(pedido.type.equals("LIST ALL PROJECTS"))
                 {
                     Resposta respostaListaProj = new Resposta("SUCCESS LIST");
-                            respostaListaProj.Projects = bd.listarProjectos(1);
+                    respostaListaProj.Projects = bd.listarProjectos(1);
                     sc.send_clients(respostaListaProj,thread_number);
                 }
                 else if(pedido.type.equals("LIST ALL PAST PROJECTS"))
@@ -174,7 +174,7 @@ public class Main {
                         sc.send_clients(RPrjName,thread_number);
                     }
                 }
-                 else if(pedido.type.equals("NEW PROJECT"))
+                else if(pedido.type.equals("NEW PROJECT"))
                 {
 
                     String data = Integer.toString(pedido.getYear())+"-"+Integer.toString(pedido.getMonth())+"-"+Integer.toString(pedido.getDay());
@@ -188,25 +188,25 @@ public class Main {
                     RwrdPrj.setRecompensas(bd.getRecompensasIDProj(pedido.getId_prj()));
                     sc.send_clients(RwrdPrj,thread_number);
                 }
-                 else if(pedido.type.equals("LIST ALTERNATIVES"))
+                else if(pedido.type.equals("LIST ALTERNATIVES"))
                 {
                     Resposta RspAlt = new Resposta("ALTERNATIVES LIST");
                     RspAlt.setArrayAlter(bd.getAltIdRecompensa(pedido.getId_Recompensa()));
                     sc.send_clients(RspAlt,thread_number);
 
                 }
-                 else if(pedido.type.equals("MAKE DONATION"))
+                else if(pedido.type.equals("MAKE DONATION"))
                 {
                     Resposta rspDoa;
                     int id_cliente = bd.getIdCliente(pedido.getUsername());
                     if(bd.fazerDoacao(pedido.getId_prj(),pedido.getMontanteDoar(),id_cliente,pedido.getId_Recompensa(),pedido.getId_Voto())==0)
                     {
-                     rspDoa = new Resposta("DONATION SUCCESS");
+                        rspDoa = new Resposta("DONATION SUCCESS");
                         sc.send_clients(rspDoa,thread_number);
                     }
                     else
                     {
-                      rspDoa = new Resposta("DONATION INSUCCESS");
+                        rspDoa = new Resposta("DONATION INSUCCESS");
                         sc.send_clients(rspDoa,thread_number);
                     }
                 }
@@ -218,17 +218,32 @@ public class Main {
                     rspRew.setRecompensas(bd.getRecompensasIDCliente(id_cliente));
                     sc.send_clients(rspRew,thread_number);
                 }
-                 else if(pedido.type.equals("LIST PROJECT DETAILS"))
+                else if(pedido.type.equals("LIST PROJECT DETAILS"))
                 {
                     Resposta r = new Resposta("PROJECT DETAILS");
                     r.setArrProject(bd.listarDetalhes_Projecto(pedido.getId_prj()));
                     sc.send_clients(r,thread_number);
                 }
-                 else if(pedido.type.equals("GET PROJECTS ID USER"))
+                else if(pedido.type.equals("GET PROJECTS ID USER"))
                 {
                     Resposta r = new Resposta("USER PROJECTS");
                     r.setArrProject(bd.getProjectosIDUser(bd.getIdCliente(pedido.getUsername())));
                     sc.send_clients(r,thread_number);
+                }else if (pedido.type.equals("SEND MESSAGE")){
+                    int r = bd.sendMessage(bd.getIdCliente(pedido.username), pedido.getId_prj(), pedido.getAssuntoMessage(), pedido.getCorpoMessage(), pedido.getTipo_mensagem());
+                    if(r == 1){
+                        Resposta resp = new Resposta("MESSAGE SUCESS");
+                        sc.send_clients(resp, thread_number);
+                    }else{
+                        Resposta resp = new Resposta("MESSAGE INSUCESS");
+                        sc.send_clients(resp, thread_number);
+                    }
+                }
+                else if (pedido.type.equals("SEE PROJECT MESSAGES BY USER")){
+                    Resposta resposta = new Resposta("SEE MESSAGES");
+                    ArrayList<Mensagem> mensagemsProj = bd.getMessages(bd.getIdCliente(pedido.username));
+                    resposta.setMensagems(mensagemsProj);
+                    sc.send_clients(resposta, thread_number);
                 }
                  else if(pedido.type.equals("ADD REWARD"))
                 {
@@ -265,58 +280,59 @@ public class Main {
                 }
 
 
-             }
-         } catch (IOException e) {
-             System.out.println("Cliente Desconectado!");
-             try {
-                 ois.close();
-                 ClientSocket.close();
-             } catch (IOException e1) {
-                 e1.printStackTrace();
-             }
-         } catch (ClassNotFoundException e) {
-             e.printStackTrace();
-         } catch (SQLException e) {
-             e.printStackTrace();
-         }
-
-     }
-
- }
-
- class Shared_Clients {
-public static ArrayList<Socket> clientes = new ArrayList<Socket>();
-        ObjectOutputStream out;
-
-synchronized void addClient(Socket c)
-        {
-        clientes.add(c);
-        System.out.println("Cliente adicionado");
+            }
+        } catch (IOException e) {
+            System.out.println("Cliente Desconectado!");
+            try {
+                ois.close();
+                ClientSocket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-synchronized void send_clients(Resposta answer, int clintNmr) throws IOException {
+    }
+
+}
+
+class Shared_Clients {
+    public static ArrayList<Socket> clientes = new ArrayList<Socket>();
+    ObjectOutputStream out;
+
+    synchronized void addClient(Socket c)
+    {
+        clientes.add(c);
+        System.out.println("Cliente adicionado");
+    }
+
+    synchronized void send_clients(Resposta answer, int clintNmr) throws IOException {
 
         int i;
         for(i=0;i<clientes.size();i++)
         {
-        try{
-        if(clintNmr == i){
-        out = new ObjectOutputStream(clientes.get(i).getOutputStream());
-        out.writeObject(answer);
-        System.out.println("Enviado para " + i);
-        }
-        }catch(IOException e){System.out.println("IO:" + e);}
+            try{
+                if(clintNmr == i){
+                    out = new ObjectOutputStream(clientes.get(i).getOutputStream());
+                    out.writeObject(answer);
+                    System.out.println("Enviado para " + i);
+                }
+            }catch(IOException e){System.out.println("IO:" + e);}
 
         }
-        }
-        }
+    }
+}
 
 class Resposta implements Serializable
 {
- String resposta;
+    String resposta;
     int saldo;
     ArrayList <Voto> arrayAlter;
     ArrayList <Projecto> ArrProject;
+    private ArrayList <Mensagem> mensagems;
 
     public ArrayList<Projecto> getArrProject() {
         return ArrProject;
@@ -364,6 +380,14 @@ class Resposta implements Serializable
 
     public Resposta(String resposta) {
         this.resposta = resposta;
+    }
+
+    public ArrayList<Mensagem> getMensagems() {
+        return mensagems;
+    }
+
+    public void setMensagems(ArrayList<Mensagem> mensagems) {
+        this.mensagems = mensagems;
     }
 }
 
