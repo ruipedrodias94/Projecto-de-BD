@@ -52,6 +52,7 @@ public class ClienteMenu {
                             System.out.println("11 - Ver respostas");
                             System.out.println("12 - Ver mensagens do Projecto");
                             System.out.println("13 - Cancelar Projecto");
+                            System.out.println("14 - Finalizar Projecto");
 
                             opcao = entrada.nextInt();
                             switch (opcao)
@@ -273,7 +274,7 @@ public class ClienteMenu {
                                     p = new Pedido(null,null,"LIST ALL PROJECTS",null);
                                     lt.send(p);
                                     Resposta r = lt.receive();
-                                    System.out.println("Projectos a que pode fazer doação: \n");
+                                    System.out.println("Projectos que pode consultar detalhes: \n");
                                     if(r.Projects.size()==0)
                                     {
                                         System.out.println("Sem Projectos Activos para Apresentar");
@@ -307,8 +308,9 @@ public class ClienteMenu {
                                             estadoAux="Inactivo";
                                         }
                                         System.out.println("Nome Projecto: "+nomeAux+" Descricao: "+descAux+" Estado: "+estadoAux+" Data Limite: "+r.getArrProject().get(i).getData_Limite()+" Dinheiro Angariado: "+dinAngAux+" Dinheiro Limite: "+dinLimAux+"\n");
-                                    }}
-
+                                    }
+                                    }
+                                    break;
                                 }
                                 case 8:
                                 {
@@ -516,6 +518,7 @@ public class ClienteMenu {
                                     {
                                         System.out.println("Projecto cancelado com sucesso.");
                                     }
+                                    break;
 
                                 }
 
@@ -531,7 +534,41 @@ public class ClienteMenu {
                                         System.out.println("ID PROJECTO: " + r.getMensagems().get(i).getProjecto_idProjecto());
                                         System.out.println("==========================================");
                                     }
+                                    break;
                                 }
+                                case 14:
+                                {
+                                    int idProjecto;
+                                    p = new Pedido(user,null,"GET PROJECTS ID USER",null);
+                                    lt.send(p);
+                                    Resposta r = lt.receive();
+                                    for(int i=0;i<r.getArrProject().size();i++)
+                                    {
+                                        String nomeAux = r.getArrProject().get(i).getNome_Projecto();
+                                        String descAux = r.getArrProject().get(i).getDescricao_Projecto();
+                                        String estadoAux;
+                                        int dinAngAux = r.getArrProject().get(i).getDinheiro_Angariado();
+                                        int dinLimAux = r.getArrProject().get(i).getDinheiro_Limite();
+                                        idProjecto = r.getArrProject().get(i).getId_Projecto();
+                                        if(r.getArrProject().get(i).getEstado()==1)
+                                        {
+                                            estadoAux = "Activo";
+                                        }
+                                        else
+                                        {
+                                            estadoAux="Inactivo";
+                                        }
+                                        System.out.println("ID Projecto: "+idProjecto+" Nome Projecto: "+nomeAux+" Descricao: "+descAux+" Estado: "+estadoAux+" Data Limite: "+r.getArrProject().get(i).getData_Limite()+" Dinheiro Angariado: "+dinAngAux+" Dinheiro Limite: "+dinLimAux+"\n");
+                                    }
+                                    System.out.println("Insira ID do projecto que pretende finalizar: ");
+                                    idProjecto = entrada.nextInt();
+                                    entrada.nextLine();
+                                    p = new Pedido(user,null,"PROJECT FINALIZATION",null);
+                                    p.setId_prj(idProjecto);
+
+                                    break;
+                                }
+
                             }
 
                         }
