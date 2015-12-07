@@ -291,6 +291,25 @@ class Connection extends Thread
                      }
                      sc.send_clients(r,thread_number);
                  }
+                else if(pedido.type.equals("PROJECT FINALIZATION"))
+                {
+                    Resposta r=null;
+                    int respostaBD = bd.finalizarProjecto(pedido.getId_prj());
+                    System.out.println("RespostaBD: "+respostaBD);
+                    if(respostaBD==0)
+                    {
+                        r = new Resposta("PROJECT CANCELED");
+                    }
+                    else if(respostaBD == 1)
+                    {
+                        r = new Resposta("PROJECT CONCLUDED");
+                    }
+                    else if(respostaBD == 2)
+                    {
+                        r = new Resposta("UNKNOWN");
+                    }
+                    sc.send_clients(r,thread_number);
+                }
 
 
             }
@@ -305,6 +324,8 @@ class Connection extends Thread
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
 

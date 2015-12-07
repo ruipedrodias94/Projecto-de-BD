@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.sql.Connection;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
@@ -411,7 +412,7 @@ public class DataBase {
                     "VALUES (?,?,?);");
 
             preparedStatement.setString(1, descricao);
-            preparedStatement.setInt(2,montante);
+            preparedStatement.setInt(2, montante);
             preparedStatement.setInt(3, id_Projecto);
 
             preparedStatement.executeUpdate();
@@ -777,7 +778,7 @@ public class DataBase {
         ArrayList<Doacao> doacoes = getDoacoes(id_Projecto);
         int saldo_Cliente = 0;
         try {
-            preparedStatement = connection.prepareStatement(" UPDATE proj_bd.projecto SET estado = 0 WHERE idProjecto = "+id_Projecto+";");
+            preparedStatement = connection.prepareStatement(" UPDATE proj_bd.projecto SET estado = 0 WHERE idProjecto = " + id_Projecto + ";");
             preparedStatement.executeUpdate();
 
         }catch (SQLException e){
@@ -845,28 +846,62 @@ public class DataBase {
      */
     //Finalizar projecto
     //Verificar data, e o dinheiro limite, se foi bem sucedido tudo bem, senao faz o cancelar projecto xD
-    public synchronized void finalizarProjectos() throws SQLException {
+    public synchronized int finalizarProjecto(int idProjecto) throws SQLException, ParseException {
         ArrayList<Projecto> projectos = getProjectos();
         ArrayList<Integer> naoCumpriram = new ArrayList<>();
         Date data_Actual = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        sdf.format(data_Actual);
-        int dinheiro_Actual, dinheiro_Limite;
+        String data_actual2 = sdf.format(data_Actual);
+        System.out.println("Data actual2: = "+data_actual2);
+        Date dataActualFormatada = sdf.parse(data_actual2);
+        int dinheiro_Actual = 0;
+        int dinheiro_Limite= 0;
+        Projecto projectoActual = null;
 
         for (int i = 0; i<projectos.size(); i++){
-            Date data_Projecto = projectos.get(i).getData_Limite();
-            dinheiro_Actual = projectos.get(i).getDinheiro_Angariado();
-            dinheiro_Limite = projectos.get(i).getDinheiro_Limite();
-            if(data_Projecto.before(data_Actual)){
-                if(dinheiro_Actual<dinheiro_Limite){
+            String data_Projecto = sdf.format(projectos.get(i).getData_Limite());
+            Date dataProjecto2 = sdf.parse(data_Projecto);
+            System.out.println("RESULTADO: "+dataActualFormatada.after(dataProjecto2));
+            if(dataActualFormatada.after(dataProjecto2)){
+                if(projectos.get(i).getDinheiro_Angariado()<projectos.get(i).getDinheiro_Limite()){
                     naoCumpriram.add(projectos.get(i).getId_Projecto());
                 }
             }
         }
+        System.out.println("TAM:"+naoCumpriram.size());
+        System.out.println("ID PRJ:"+idProjecto);
 
-        for (int i = 0; i< naoCumpriram.size(); i++){
-            cancelarProjecto(naoCumpriram.get(i));
+        for (int i = 0; i<naoCumpriram.size(); i++){
+            System.out.println("IDS: "+naoCumpriram.get(i));
+            if(naoCumpriram.get(i)==idProjecto)
+            {
+                cancelarProjecto(naoCumpriram.get(i));
+                System.out.println("Cancelado projecto com id"+naoCumpriram.get(i));
+                return 0;
+            }
         }
+        for(int i = 0;i<projectos.size();i++)
+        {
+            if(projectos.get(i).getId_Projecto() == idProjecto)
+            {
+                projectoActual = projectos.get(i);
+            }
+        }
+
+        //TODO Alterar para ficar transaccional
+        if(dataActualFormatada.after(projectoActual.getData_Limite()))
+        {
+            if(projectoActual.getDinheiro_Angariado()>=projectoActual.getDinheiro_Limite())
+            {
+                int saldoDono = consultarSaldo(projectoActual.getCliente_idCliente());
+                saldoDono = saldoDono + projectoActual.getDinheiro_Angariado();
+                updateSaldoCliente(projectoActual.getCliente_idCliente(), saldoDono);
+                System.out.println("Projecto concluido: dinheiro enviado para a conta do dono");
+                return 1;
+            }
+        }
+        return 2;
+
     }
 
     /**

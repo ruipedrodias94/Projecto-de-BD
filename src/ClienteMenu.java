@@ -565,6 +565,20 @@ public class ClienteMenu {
                                     entrada.nextLine();
                                     p = new Pedido(user,null,"PROJECT FINALIZATION",null);
                                     p.setId_prj(idProjecto);
+                                    lt.send(p);
+                                    Resposta rFP = lt.receive();
+                                    if(rFP.resposta.equals("PROJECT CANCELED"))
+                                    {
+                                        System.out.println("Projecto cancelado! Não reuniu o montante necessario.");
+                                    }
+                                    else if(rFP.resposta.equals("PROJECT CONCLUDED"))
+                                    {
+                                        System.out.println("Projecto Conluído! Dinheiro angariado enviado para o seu saldo!");
+                                    }
+                                    else if(rFP.resposta.equals("UNKKOWN"))
+                                    {
+                                        System.out.println("ERRO!");
+                                    }
 
                                     break;
                                 }
