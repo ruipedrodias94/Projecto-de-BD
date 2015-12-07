@@ -47,13 +47,11 @@ public class ClienteMenu {
                             System.out.println("6 - Doar para Projecto");
                             System.out.println("7 - Consultar Detalhes de Projecto");
                             System.out.println("8 - Adicionar / Remover Recompensas a Projecto");
-                            System.out.println("9 - Enviar mensagem Projecto");
-                            System.out.println("10 - Responder mensagem a Cliente");
-                            System.out.println("11 - Ver respostas");
-                            System.out.println("12 - Ver mensagens do Projecto");
+                            System.out.println("9 - Enviar mensagem");
+                            System.out.println("10 - Ver Caixa de entrada");
                             System.out.println("13 - Cancelar Projecto");
                             System.out.println("14 - Finalizar Projecto");
-
+                            System.out.println("\n");
                             opcao = entrada.nextInt();
                             switch (opcao)
                             {
@@ -266,8 +264,6 @@ public class ClienteMenu {
                                         System.out.println("Erro! doacao nao concluida!");
                                     }
                                     break;
-
-
                                 }
                                 case 7:
                                 {
@@ -294,21 +290,23 @@ public class ClienteMenu {
                                     for(int i=0;i<r.getArrProject().size();i++)
                                     {
                                         if(r.getArrProject().get(i).getId_Projecto() == id_projecto){
-                                        String nomeAux = r.getArrProject().get(i).getNome_Projecto();
-                                        String descAux = r.getArrProject().get(i).getDescricao_Projecto();
-                                        String estadoAux;
-                                        int dinAngAux = r.getArrProject().get(i).getDinheiro_Angariado();
-                                        int dinLimAux = r.getArrProject().get(i).getDinheiro_Limite();
-                                        if(r.getArrProject().get(i).getEstado()==1)
-                                        {
-                                            estadoAux = "Activo";
+                                            String nomeAux = r.getArrProject().get(i).getNome_Projecto();
+                                            String descAux = r.getArrProject().get(i).getDescricao_Projecto();
+                                            String estadoAux;
+                                            int dinAngAux = r.getArrProject().get(i).getDinheiro_Angariado();
+                                            int dinLimAux = r.getArrProject().get(i).getDinheiro_Limite();
+                                            if(r.getArrProject().get(i).getEstado()==1)
+                                            {
+                                                estadoAux = "Activo";
+                                            }
+                                            else
+                                            {
+                                                estadoAux="Inactivo";
+                                            }
+                                            System.out.println("Nome Projecto: "+nomeAux+"\nDescricao: "+descAux+"\nEstado: "+estadoAux+"\nData Limite: "+r.getArrProject().get(i).getData_Limite()+
+                                                    "\nDinheiro Angariado: "+dinAngAux+"\nDinheiro Limite: "+dinLimAux+"\n");
+                                            System.out.print("=================================");
                                         }
-                                        else
-                                        {
-                                            estadoAux="Inactivo";
-                                        }
-                                        System.out.println("Nome Projecto: "+nomeAux+" Descricao: "+descAux+" Estado: "+estadoAux+" Data Limite: "+r.getArrProject().get(i).getData_Limite()+" Dinheiro Angariado: "+dinAngAux+" Dinheiro Limite: "+dinLimAux+"\n");
-                                    }
                                     }
                                     break;
                                 }
@@ -323,22 +321,24 @@ public class ClienteMenu {
                                     Resposta r = lt.receive();
                                     for(int i=0;i<r.getArrProject().size();i++)
                                     {
-                                            String nomeAux = r.getArrProject().get(i).getNome_Projecto();
-                                            String descAux = r.getArrProject().get(i).getDescricao_Projecto();
-                                            String estadoAux;
-                                            int dinAngAux = r.getArrProject().get(i).getDinheiro_Angariado();
-                                            int dinLimAux = r.getArrProject().get(i).getDinheiro_Limite();
-                                            idProjecto = r.getArrProject().get(i).getId_Projecto();
-                                            if(r.getArrProject().get(i).getEstado()==1)
-                                            {
-                                                estadoAux = "Activo";
-                                            }
-                                            else
-                                            {
-                                                estadoAux="Inactivo";
-                                            }
-                                            System.out.println("ID Projecto: "+idProjecto+" Nome Projecto: "+nomeAux+" Descricao: "+descAux+" Estado: "+estadoAux+" Data Limite: "+r.getArrProject().get(i).getData_Limite()+" Dinheiro Angariado: "+dinAngAux+" Dinheiro Limite: "+dinLimAux+"\n");
+                                        String nomeAux = r.getArrProject().get(i).getNome_Projecto();
+                                        String descAux = r.getArrProject().get(i).getDescricao_Projecto();
+                                        String estadoAux;
+                                        int dinAngAux = r.getArrProject().get(i).getDinheiro_Angariado();
+                                        int dinLimAux = r.getArrProject().get(i).getDinheiro_Limite();
+                                        idProjecto = r.getArrProject().get(i).getId_Projecto();
+                                        if(r.getArrProject().get(i).getEstado()==1)
+                                        {
+                                            estadoAux = "Activo";
                                         }
+                                        else
+                                        {
+                                            estadoAux="Inactivo";
+                                        }
+                                        System.out.println("ID Projecto: "+idProjecto+"\nNome Projecto: "+nomeAux+"\nDescricao: "+descAux+
+                                                "\nEstado: "+estadoAux+"\nData Limite: "+r.getArrProject().get(i).getData_Limite()+"" +
+                                                "\nDinheiro Angariado: "+dinAngAux+"\nDinheiro Limite: "+dinLimAux+"\n=================");
+                                    }
                                     idProjecto = entrada.nextInt();
                                     entrada.nextLine();
                                     if(opcao1==1)
@@ -379,7 +379,6 @@ public class ClienteMenu {
                                             p.getArrayRecompensas().add(rP);
                                             p.setId_prj(idProjecto);
                                             rec--;
-
                                         }
                                         lt.send(p);
                                         Resposta RewAns = lt.receive();
@@ -387,12 +386,9 @@ public class ClienteMenu {
                                         {
                                             System.out.println("Recompensa(s) adicionada(s) com sucesso");
                                         }
-
                                     }
                                     else if(opcao1==2)
                                     {
-
-
                                         System.out.println(idProjecto);
                                         p = new Pedido(user,null,"LIST REWARDS PROJECT",null);
                                         p.setId_prj(idProjecto);
@@ -402,7 +398,7 @@ public class ClienteMenu {
                                         for(int i = 0;i<r.getRecompensas().size();i++)
                                         {
 
-                                                System.out.println("ID: "+r.getRecompensas().get(i).getId_Recompensa()+" "+"Descriçao: "+r.getRecompensas().get(i).getDescricao_Recompensa()+" Montante Necessario: "+r.getRecompensas().get(i).getMontante_Recompensa());
+                                            System.out.println("ID: "+r.getRecompensas().get(i).getId_Recompensa()+" "+"Descriçao: "+r.getRecompensas().get(i).getDescricao_Recompensa()+" Montante Necessario: "+r.getRecompensas().get(i).getMontante_Recompensa());
                                         }
                                         System.out.println("Insira o ID da recompensa que pretende eliminar:");
                                         int id_recompensa = entrada.nextInt();
@@ -425,28 +421,126 @@ public class ClienteMenu {
 
                                 case 9:
                                 {
-                                    System.out.println("Para que projecto deseja mandar uma mensagem?");
-                                    int id = entrada.nextInt();
+                                    System.out.println("Pretende enviar para um projecto ou responder a um Cliente? e - enviar / r - responder");
+                                    String escolha = entrada.nextLine();
                                     entrada.nextLine();
-                                    System.out.println("Qual é o assunto? ");
-                                    String assunto = entrada.nextLine();
-                                    System.out.println("Corpo da mensagem: ");
-                                    String corpoMessage = entrada.nextLine();
-                                    p = new Pedido(user, null, "SEND MESSAGE", null);
-                                    p.setAssuntoMessage(assunto);
-                                    p.setCorpoMessage(corpoMessage);
-                                    p.setId_prj(id);
-                                    p.setTipo_mensagem(1);
-                                    lt.send(p);
+                                    if(escolha.equals("e")){
+                                        p = new Pedido(user,null,"GET PROJECTS",null);
+                                        lt.send(p);
+                                        Resposta r = lt.receive();
 
-                                    Resposta rt = lt.receive();
-                                    if (rt.resposta.equals("MESSAGE SUCESS")){
-                                        System.out.println("Mensagem enviada com sucesso!");
-                                    }else{
-                                        System.out.println("Mensagem enviada com insucesso!");
+                                        ArrayList<Projecto> aux = new ArrayList<>();
+                                        for (int i = 0; i < r.getArrProject().size(); i++){
+                                            if (r.getArrProject().get(i).getCliente_idCliente() != r.getIdCliente()){
+                                                aux.add(r.getArrProject().get(i));
+                                            }
+                                        }
+                                        if(aux.size() == 0){
+                                            System.out.println("Não tem projectos para enviar mensagens");
+                                            break;
+                                        }else{
+                                            for (int i = 0; i < aux.size(); i++){
+                                                System.out.println("ID: " + aux.get(i).getId_Projecto() +
+                                                        "\nNOME: " + aux.get(i).getNome_Projecto() +
+                                                        "===============");
+                                            }
+                                        }
+
+                                        System.out.println("Para que projecto deseja mandar uma mensagem?");
+                                        int id = entrada.nextInt();
+                                        entrada.nextLine();
+                                        System.out.println("Qual é o assunto? ");
+                                        String assunto = entrada.nextLine();
+                                        System.out.println("Corpo da mensagem: ");
+                                        String corpoMessage = entrada.nextLine();
+                                        p = new Pedido(user, null, "SEND MESSAGE", null);
+                                        p.setAssuntoMessage(assunto);
+                                        p.setCorpoMessage(corpoMessage);
+                                        p.setId_prj(id);
+                                        p.setTipo_mensagem(1);
+                                        lt.send(p);
+
+                                        Resposta rt = lt.receive();
+                                        if (rt.resposta.equals("MESSAGE SUCESS")){
+                                            System.out.println("Mensagem enviada com sucesso!");
+                                        }else{
+                                            System.out.println("Mensagem enviada com insucesso!");
+                                        }
                                     }
+                                    else{
+                                        p = new Pedido(user, null, "SEE PROJECT MESSAGES BY USER", null);
+                                        lt.send(p);
+
+                                        Resposta r = lt.receive();
+                                        if(r.getMensagems().size() != 0) {
+                                            for (int i = 0; i < r.getMensagems().size(); i++) {
+                                                if (r.getMensagems().get(i).getTipo() == 1) {
+                                                    System.out.println("ID MENSAGEM: " + r.getMensagems().get(i).getId_Mensagem());
+                                                    System.out.println("ASSUNTO: " + r.getMensagems().get(i).getAssunto_Mensagem());
+                                                    System.out.println("DESCRICAO: " + r.getMensagems().get(i).getDescricao_Mensagem());
+                                                    System.out.println("ID PROJECTO: " + r.getMensagems().get(i).getProjecto_idProjecto());
+                                                    System.out.println("==========================================");
+                                                }
+                                            }
+                                        }else {
+                                            System.out.println("Nao tem mensagens na caixa de entrada.");
+                                            break;
+                                        }
+
+                                        System.out.println("Para que mensagem deseja responder?");
+                                        int id_msg = entrada.nextInt();
+                                        entrada.nextLine();
+                                        System.out.println("Qual é o assunto? ");
+                                        String assunto = entrada.nextLine();
+                                        System.out.println("Corpo da mensagem: ");
+                                        String corpoMessage = entrada.nextLine();
+                                        p = new Pedido(user, null, "ANSWER MESSAGE", null);
+                                        p.setAssuntoMessage(assunto);
+                                        p.setCorpoMessage(corpoMessage);
+                                        p.setId_mensagem(id_msg);
+                                        p.setTipo_mensagem(1);
+                                        lt.send(p);
+
+                                        Resposta rt = lt.receive();
+                                        if (rt.resposta.equals("MESSAGE SUCESS")){
+                                            System.out.println("Mensagem enviada com sucesso!");
+                                        }else{
+                                            System.out.println("Mensagem enviada com insucesso!");
+                                        }
+
+                                    }
+                                    break;
                                 }
                                 case 10:
+                                {
+                                    p = new Pedido(user, null, "SEE PROJECT MESSAGES BY USER", null);
+                                    lt.send(p);
+
+                                    Resposta r = lt.receive();
+                                    ArrayList<Mensagem> mensagemsAux = new ArrayList<>();
+                                    for (int i = 0; i< r.getMensagems().size(); i++){
+                                        if(r.getMensagems().get(i).getTipo() == 1){
+                                            mensagemsAux.add(r.getMensagems().get(i));
+
+                                        }
+                                    }
+
+                                    if(mensagemsAux.size() == 0){
+                                        System.out.println("Nao tem mensagens na caixa de entrada.");
+                                        break;
+                                    }else{
+                                        for (int i = 0; i< mensagemsAux.size(); i++){
+                                            System.out.println("ID MENSAGEM: " + mensagemsAux.get(i).getId_Mensagem());
+                                            System.out.println("ASSUNTO: " + mensagemsAux.get(i).getAssunto_Mensagem());
+                                            System.out.println("DESCRICAO: " + mensagemsAux.get(i).getDescricao_Mensagem());
+                                            System.out.println("ID PROJECTO: " + mensagemsAux.get(i).getProjecto_idProjecto());
+                                            System.out.println("==========================================");
+                                        }
+                                    }
+                                    break;
+                                }
+
+                                case 11:
                                 {
                                     System.out.println("Quer ver as mensagens relativas a que projecto?");
                                     int id = entrada.nextInt();
@@ -459,7 +553,7 @@ public class ClienteMenu {
                                     if (r.resposta.equals("SEE MESSAGES")){
                                         for (int i = 0; i< r.getMensagems().size(); i++ ){
                                             System.out.println("ID: " + r.getMensagems().get(i).getId_Mensagem() + "------<> ASSUNTO: " +
-                                            r.getMensagems().get(i).getAssunto_Mensagem());
+                                                    r.getMensagems().get(i).getAssunto_Mensagem());
                                         }
                                     }
 
@@ -473,9 +567,8 @@ public class ClienteMenu {
                                     p = new Pedido(user, null, "SEND MESSAGE", null);
                                     p.setAssuntoMessage(assunto);
                                     p.setCorpoMessage(corpoMessage);
-                                    p.setId_prj(id);
                                     p.setId_mensagem(id_mensagem);
-                                    p.setTipo_mensagem(2);
+                                    p.setTipo_mensagem(1);
                                     lt.send(p);
 
                                 }
@@ -522,20 +615,6 @@ public class ClienteMenu {
 
                                 }
 
-                                case 12:
-                                {
-                                    p = new Pedido(user, null, "SEE PROJECT MESSAGES BY USER", null);
-                                    lt.send(p);
-
-                                    Resposta r = lt.receive();
-                                    for (int i = 0; i< r.getMensagems().size(); i++){
-                                        System.out.println("ID MENSAGEM: " + r.getMensagems().get(i).getId_Mensagem());
-                                        System.out.println("ASSUNTO: " + r.getMensagems().get(i).getAssunto_Mensagem());
-                                        System.out.println("ID PROJECTO: " + r.getMensagems().get(i).getProjecto_idProjecto());
-                                        System.out.println("==========================================");
-                                    }
-                                    break;
-                                }
                                 case 14:
                                 {
                                     int idProjecto;
@@ -621,48 +700,48 @@ public class ClienteMenu {
     }}
 
 
- class LigacaoTCP{
-     String hostname = "localhost";
-     int port = 6000;
-     Socket s;
+class LigacaoTCP{
+    String hostname = "localhost";
+    int port = 6000;
+    Socket s;
 
-     public void ligaCliente() {
-         try {
-             s = new Socket(InetAddress.getLocalHost(), port);
-             System.out.println("socket: " + s);
+    public void ligaCliente() {
+        try {
+            s = new Socket(InetAddress.getLocalHost(), port);
+            System.out.println("socket: " + s);
 
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
-     }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-     public void send(Pedido r){
+    public void send(Pedido r){
 
-         try {
-             OutputStream os = s.getOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(os);
-             oos.writeObject(r);
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
-     }
+        try {
+            OutputStream os = s.getOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(os);
+            oos.writeObject(r);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-     public Resposta receive()
-     {    ObjectInputStream ois = null;
-         Resposta r = null;
-         try {
-             InputStream in = s.getInputStream();
-             ois = new ObjectInputStream(in);
-             r = (Resposta) ois.readObject();
-         } catch (ClassNotFoundException e) {
-             e.printStackTrace();
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
+    public Resposta receive()
+    {    ObjectInputStream ois = null;
+        Resposta r = null;
+        try {
+            InputStream in = s.getInputStream();
+            ois = new ObjectInputStream(in);
+            r = (Resposta) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-         return r;
-     }
- }
+        return r;
+    }
+}
 
 class Pedido implements Serializable
 {

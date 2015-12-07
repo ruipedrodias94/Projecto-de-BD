@@ -11,19 +11,21 @@ public class Mensagem implements Serializable {
     private String descricao_Mensagem;
     private Date data_Mensagem;
     private int tipo;
-    private int Projecto_idProjecto;
-    private int Cliente_idCliente;
+    private int clienteRecebe;
 
-    public Mensagem(int id_Mensagem, String assunto_Mensagem, String descricao_Mensagem, Date data_Mensagem, int tipo, int projecto_idProjecto, int cliente_idCliente) {
-        this.setId_Mensagem(id_Mensagem);
-        this.setAssunto_Mensagem(assunto_Mensagem);
-        this.setDescricao_Mensagem(descricao_Mensagem);
-        this.setData_Mensagem(data_Mensagem);
-        this.setTipo(tipo);
-        setProjecto_idProjecto(projecto_idProjecto);
-        setCliente_idCliente(cliente_idCliente);
+    public Mensagem(int id_Mensagem, String assunto_Mensagem, String descricao_Mensagem, Date data_Mensagem, int tipo, int clienteRecebe, int projecto_idProjecto, int cliente_idCliente) {
+        this.id_Mensagem = id_Mensagem;
+        this.assunto_Mensagem = assunto_Mensagem;
+        this.descricao_Mensagem = descricao_Mensagem;
+        this.data_Mensagem = data_Mensagem;
+        this.tipo = tipo;
+        this.clienteRecebe = clienteRecebe;
+        Projecto_idProjecto = projecto_idProjecto;
+        Cliente_idCliente = cliente_idCliente;
     }
 
+    private int Projecto_idProjecto;
+    private int Cliente_idCliente;
 
     public int getId_Mensagem() {
         return id_Mensagem;

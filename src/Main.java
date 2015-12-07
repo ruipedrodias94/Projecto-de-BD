@@ -229,8 +229,17 @@ class Connection extends Thread
                     Resposta r = new Resposta("USER PROJECTS");
                     r.setArrProject(bd.getProjectosIDUser(bd.getIdCliente(pedido.getUsername())));
                     sc.send_clients(r,thread_number);
-                }else if (pedido.type.equals("SEND MESSAGE")){
-                    int r = bd.sendMessage(bd.getIdCliente(pedido.username), pedido.getId_prj(), pedido.getAssuntoMessage(), pedido.getCorpoMessage(), pedido.getTipo_mensagem());
+                }
+                else if (pedido.type.equals("GET PROJECTS"))
+                {
+                    Resposta r = new Resposta("GET ALL PROJECTS");
+                    r.setArrProject(bd.getProjectos());
+                    r.setIdCliente(bd.getIdCliente(pedido.username));
+                    sc.send_clients(r,thread_number);
+                }
+                else if (pedido.type.equals("SEND MESSAGE"))
+                {
+                    int r = bd.sendMessage(bd.getIdCliente(pedido.username), pedido.getId_prj(), bd.getIdCliente_Proj(pedido.getId_prj()), pedido.getAssuntoMessage(), pedido.getCorpoMessage(), 1);
                     if(r == 1){
                         Resposta resp = new Resposta("MESSAGE SUCESS");
                         sc.send_clients(resp, thread_number);
@@ -238,6 +247,18 @@ class Connection extends Thread
                         Resposta resp = new Resposta("MESSAGE INSUCESS");
                         sc.send_clients(resp, thread_number);
                     }
+                }
+                else if (pedido.type.equals("ANSWER MESSAGE")){
+                    int r = bd.sendMessage(bd.getIdCliente(pedido.username),bd.getIdProjByMessage(pedido.getId_mensagem()),bd.getIdRecebeByMessage(pedido.getId_mensagem()),
+                            pedido.getAssuntoMessage(),pedido.getCorpoMessage(),pedido.getTipo_mensagem());
+                    if(r == 1){
+                        Resposta resp = new Resposta("MESSAGE SUCESS");
+                        sc.send_clients(resp, thread_number);
+                    }else{
+                        Resposta resp = new Resposta("MESSAGE INSUCESS");
+                        sc.send_clients(resp, thread_number);
+                    }
+
                 }
                 else if (pedido.type.equals("SEE PROJECT MESSAGES BY USER")){
                     Resposta resposta = new Resposta("SEE MESSAGES");
@@ -364,6 +385,7 @@ class Resposta implements Serializable
 {
     String resposta;
     int saldo;
+    private int idCliente;
     ArrayList <Voto> arrayAlter;
     ArrayList <Projecto> ArrProject;
     private ArrayList <Mensagem> mensagems;
@@ -422,6 +444,14 @@ class Resposta implements Serializable
 
     public void setMensagems(ArrayList<Mensagem> mensagems) {
         this.mensagems = mensagems;
+    }
+
+    public int getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(int idCliente) {
+        this.idCliente = idCliente;
     }
 }
 

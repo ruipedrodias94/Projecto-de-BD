@@ -50,7 +50,7 @@ public class DataBase {
         System.out.println("[DATABASE] Oracle JDBC driver instalada");
 
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "pass");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "root");
         }catch (SQLException e){
             System.out.println("Falhou a fazer a connexao a base de dados!");
             System.out.println(e.getLocalizedMessage());
@@ -276,7 +276,7 @@ public class DataBase {
         String proj = "";
         for (int i = 0; i<projectosAux.size(); i++){
             if (projectosAux.get(i).getEstado() == state){
-                proj = "ID: " + projectosAux.get(i).getId_Projecto() + "  -----<> " +" Data Limite: "+projectosAux.get(i).getData_Limite().toString()+" Dinheiro Limite: "+projectosAux.get(i).getDinheiro_Limite()+" Dinheiro Angariado: "+projectosAux.get(i).getDinheiro_Angariado();
+                proj = "ID: " + projectosAux.get(i).getId_Projecto() + "  -----<> NOME: "+ projectosAux.get(i).getNome_Projecto() +"\nData Limite: "+projectosAux.get(i).getData_Limite().toString()+" Dinheiro Limite: "+projectosAux.get(i).getDinheiro_Limite()+" Dinheiro Angariado: "+projectosAux.get(i).getDinheiro_Angariado();
                 projectos_Actuais.add(proj);
             }
         }
@@ -820,6 +820,18 @@ public class DataBase {
         return doacoesAux;
     }
 
+    public synchronized int getIdCliente_Proj(int id_Proj){
+        ArrayList<Projecto> projectos = getProjectos();
+        int id=0;
+        for (int i = 0; i< projectos.size(); i++){
+            if (projectos.get(i).getId_Projecto() == id_Proj){
+                id = projectos.get(i).getCliente_idCliente();
+                break;
+            }
+        }
+        return id;
+    }
+
     //Get doacoes
     public synchronized ArrayList<Voto> getAltIdRecompensa(int id_Recompensa){
         ArrayList<Voto> altAux = new ArrayList<>();
@@ -913,15 +925,15 @@ public class DataBase {
      * @param assunto
      * @param descricao
      */
-    public synchronized int sendMessage(int id_Cliente, int id_Projecto, String assunto, String descricao, int tipo){
+    public synchronized int sendMessage(int id_Cliente, int id_Projecto, int clienteRecebe, String assunto, String descricao, int tipo){
         Date data = new Date();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         String dataString = df.format(data);
         try{
             connection.setAutoCommit(false);
             statement = connection.createStatement();
-            statement.executeUpdate("INSERT INTO proj_bd.mensagem (assunto_Mensagem, conteudo_Mensagem, data_Mensagem, tipo_Mensagem, Projecto_idProjecto, Cliente_idCliente) " +
-                    "VALUES ('" + assunto + "','"+ descricao +"','"+ java.sql.Date.valueOf(dataString) +"', "+ tipo +", "+ id_Projecto + "," + id_Cliente +");");
+            statement.executeUpdate("INSERT INTO proj_bd.mensagem (assunto_Mensagem, conteudo_Mensagem, data_Mensagem, tipo_Mensagem, clienteRecebe, Projecto_idProjecto, Cliente_idCliente_Envia) " +
+                    "VALUES ('" + assunto + "','"+ descricao +"','"+ java.sql.Date.valueOf(dataString) +"', "+ tipo +", " + clienteRecebe + ","+ id_Projecto + "," + id_Cliente +");");
             connection.commit();
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
@@ -944,18 +956,46 @@ public class DataBase {
         Mensagem mensagemAux;
         try {
             statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT idMensagem, assunto_Mensagem, conteudo_Mensagem, data_Mensagem, tipo_Mensagem, mensagem.Projecto_idProjecto, mensagem.Cliente_idCliente" +
-                    " FROM proj_bd.mensagem, proj_bd.cliente, proj_bd.projecto WHERE cliente.idCliente = mensagem.Cliente_idCliente \n" +
-                    "AND projecto.idProjecto = mensagem.Projecto_idProjecto AND cliente.idCliente = "+ id_User + ";");
+            resultSet = statement.executeQuery("SELECT idMensagem, assunto_Mensagem, conteudo_Mensagem, data_Mensagem, tipo_Mensagem, clienteRecebe, mensagem.Projecto_idProjecto, mensagem.Cliente_idCliente_Envia" +
+                    " FROM proj_bd.mensagem WHERE clienteRecebe = "+ id_User + ";");
             while (resultSet.next()){
-                mensagemAux = new Mensagem(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getDate(4), resultSet.getInt(5),resultSet.getInt(6), resultSet.getInt(7));
+                mensagemAux = new Mensagem(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getDate(4), resultSet.getInt(5),resultSet.getInt(6), resultSet.getInt(7), resultSet.getInt(8));
                 mensagens.add(mensagemAux);
             }
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
         }
-
         return mensagens;
+    }
+
+    public synchronized int getIdRecebeByMessage(int idMessage) throws SQLException{
+        int id = 0;
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("SELECT Cliente_idCliente_Envia" +
+                    " FROM proj_bd.mensagem WHERE idMensagem = "+ idMessage + ";");
+            while (resultSet.next()){
+               id = resultSet.getInt(1);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return id;
+    }
+
+    public synchronized int getIdProjByMessage(int idMessage) throws SQLException{
+        int id = 0;
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("SELECT Projecto_idProjecto" +
+                    " FROM proj_bd.mensagem WHERE idMensagem = "+ idMessage + ";");
+            while (resultSet.next()){
+                id = resultSet.getInt(1);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return id;
     }
 
 
