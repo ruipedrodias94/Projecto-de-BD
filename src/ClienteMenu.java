@@ -421,10 +421,10 @@ public class ClienteMenu {
 
                                 case 9:
                                 {
-                                    System.out.println("Pretende enviar para um projecto ou responder a um Cliente? e - enviar / r - responder");
-                                    String escolha = entrada.nextLine();
+                                    System.out.println("Pretende enviar para um projecto ou para um Cliente? P - Projecto / C - Cliente");
+                                    String escolha = entrada.next();
                                     entrada.nextLine();
-                                    if(escolha.equals("e")){
+                                    if(escolha.matches("P")){
                                         p = new Pedido(user,null,"GET PROJECTS",null);
                                         lt.send(p);
                                         Resposta r = lt.receive();
@@ -436,7 +436,7 @@ public class ClienteMenu {
                                             }
                                         }
                                         if(aux.size() == 0){
-                                            System.out.println("Não tem projectos para enviar mensagens");
+                                            System.out.println("Não tem projectos para enviar mensagens!");
                                             break;
                                         }else{
                                             for (int i = 0; i < aux.size(); i++){
@@ -483,7 +483,7 @@ public class ClienteMenu {
                                                 }
                                             }
                                         }else {
-                                            System.out.println("Nao tem mensagens na caixa de entrada.");
+                                            System.out.println("Nao tem mensagens na caixa de entrada!");
                                             break;
                                         }
 
@@ -526,7 +526,7 @@ public class ClienteMenu {
                                     }
 
                                     if(mensagemsAux.size() == 0){
-                                        System.out.println("Nao tem mensagens na caixa de entrada.");
+                                        System.out.println("Nao tem mensagens na caixa de entrada!");
                                         break;
                                     }else{
                                         for (int i = 0; i< mensagemsAux.size(); i++){
