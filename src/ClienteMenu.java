@@ -51,6 +51,7 @@ public class ClienteMenu {
                             System.out.println("10 - Ver Caixa de entrada");
                             System.out.println("13 - Cancelar Projecto");
                             System.out.println("14 - Finalizar Projecto");
+                            System.out.println("0 - Sair");
                             System.out.println("\n");
                             opcao = entrada.nextInt();
                             switch (opcao)
@@ -661,6 +662,12 @@ public class ClienteMenu {
 
                                     break;
                                 }
+                                case 0:
+                                {login = false;}
+                                    break;
+                                default:{
+                                    System.out.println("Input incorreto, tente novamente");
+                                }
 
                             }
 
@@ -692,6 +699,10 @@ public class ClienteMenu {
                         System.out.println("Username já usado! por favor escolha outro...");
                     }
                     break;
+                }
+                case 0:
+                {
+                    System.exit(0);
                 }
 
             }
