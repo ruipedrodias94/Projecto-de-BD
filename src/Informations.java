@@ -11,6 +11,28 @@ public class Informations {
 
     private int socket_port;
     private String ip_servidorBD;
+    private String pass;
+    private String user;
+
+    public void setSocket_port(int socket_port) {
+        this.socket_port = socket_port;
+    }
+
+    public String getPass() {
+        return pass;
+    }
+
+    public void setPass(String pass) {
+        this.pass = pass;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
 
     public Informations(){
 
@@ -24,6 +46,8 @@ public class Informations {
 
             this.setServer_port(Integer.parseInt(props.getProperty("socket_port")));
             this.setIp_servidorBD(props.getProperty("ip_servidorBD"));
+            this.setPass(props.getProperty("dbpass"));
+            this.setUser(props.getProperty("dbuser"));
 
         }catch (IOException e){
             System.out.println(e.getLocalizedMessage());
