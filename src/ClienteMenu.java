@@ -49,8 +49,8 @@ public class ClienteMenu {
                             System.out.println("8 - Adicionar / Remover Recompensas a Projecto");
                             System.out.println("9 - Enviar mensagem");
                             System.out.println("10 - Ver Caixa de entrada");
-                            System.out.println("13 - Cancelar Projecto");
-                            System.out.println("14 - Finalizar Projecto");
+                            System.out.println("11 - Cancelar Projecto");
+                            System.out.println("12 - Finalizar Projecto");
                             System.out.println("0 - Sair");
                             System.out.println("\n");
                             opcao = entrada.nextInt();
@@ -152,7 +152,7 @@ public class ClienteMenu {
                                         System.out.println("A partir de que montante quer que a recompensa seja oferecida?");
                                         int mont_aux = entrada.nextInt();
                                         entrada.nextLine();
-                                        System.out.println("Pretende que a recompensa tenha alternativas? Sim - s; Não - n");
+                                        System.out.println("Pretende que a recompensa tenha mais que uma alternativa? Sim - s Não - n");
                                         String altB = entrada.nextLine();
                                         ArrayList <Alternativa> aA = new ArrayList<>();
                                         if(altB.equals("s"))
@@ -170,6 +170,13 @@ public class ClienteMenu {
 
                                             }
 
+                                        }
+                                        else if(altB.equals("n"))
+                                        {
+                                            System.out.println("Insira uma descrição da alternativa:");
+                                            Alternativa a = new Alternativa();
+                                            a.setTipoAlt(entrada.nextLine());
+                                            aA.add(a);
                                         }
                                         Recompensa_proj rP = new Recompensa_proj(desc_aux,mont_aux);
                                         rP.setAlt(aA);
@@ -239,22 +246,19 @@ public class ClienteMenu {
                                     ArrayList <Voto> aV = new ArrayList<>();
                                     r = lt.receive();
                                     aV = r.getArrayAlter();
-                                    if(aV.size()>0){
+
                                     for(int i = 0 ;i<aV.size();i++)
                                     {
-                                        p.setnVotos(aV.size());
                                         System.out.println(" ID Aternativa: "+aV.get(i).idVoto+" Descricao: "+aV.get(i).descricao);
                                     }
                                     System.out.println("Insira o ID da alternativa que pretende: ");
                                     int idAlternativa = entrada.nextInt();
                                     entrada.nextLine();
                                         p.setId_Voto(idAlternativa);
-                                    }
-                                    else
-                                    {
-                                        p.setnVotos(0);
-                                    }
+
+
                                     p = new Pedido(user,null,"MAKE DONATION",null);
+                                    p.setnVotos(aV.size());
                                     p.setId_Recompensa(ID_Recompensa);
                                     p.setId_prj(ID_PROJ);
 
@@ -328,6 +332,8 @@ public class ClienteMenu {
                                     p = new Pedido(user,null,"GET PROJECTS ID USER",null);
                                     lt.send(p);
                                     Resposta r = lt.receive();
+                                    System.out.println("Projectos a que pode adicionar ou remover recompensas:");
+
                                     for(int i=0;i<r.getArrProject().size();i++)
                                     {
                                         String nomeAux = r.getArrProject().get(i).getNome_Projecto();
@@ -344,86 +350,91 @@ public class ClienteMenu {
                                         {
                                             estadoAux="Inactivo";
                                         }
-                                        System.out.println("ID Projecto: "+idProjecto+"\nNome Projecto: "+nomeAux+"\nDescricao: "+descAux+
-                                                "\nEstado: "+estadoAux+"\nData Limite: "+r.getArrProject().get(i).getData_Limite()+"" +
-                                                "\nDinheiro Angariado: "+dinAngAux+"\nDinheiro Limite: "+dinLimAux+"\n=================");
+                                        if(r.getArrProject().get(i).getEstado()==1) {
+                                            System.out.println("ID Projecto: " + idProjecto + "\nNome Projecto: " + nomeAux + "\nDescricao: " + descAux +
+                                                    "\nEstado: " + estadoAux + "\nData Limite: " + r.getArrProject().get(i).getData_Limite() + "" +
+                                                    "\nDinheiro Angariado: " + dinAngAux + "\nDinheiro Limite: " + dinLimAux + "\n=================");
+                                        }
                                     }
-                                    idProjecto = entrada.nextInt();
-                                    entrada.nextLine();
-                                    if(opcao1==1)
+                                    if(r.getArrProject().size()==0)
                                     {
-                                        p = new Pedido(user,null,"ADD REWARD",null);
-                                        System.out.println("Quantas Recompensas pretende adicionar ao projecto?");
-                                        int rec = entrada.nextInt();
+                                        System.out.println("Não existem projectos a que possa adicionar ou remover recompensas.");
+                                    }
+                                    else {
+                                        System.out.println("Insira o ID do projecto que pretende adicionar ou remover recompensa:"
+                                        );
+                                        idProjecto = entrada.nextInt();
                                         entrada.nextLine();
-                                        while(rec>0)
-                                        {
-
-                                            System.out.println("Insira uma descrição da Recompensa:");
-                                            String desc_aux = entrada.nextLine();
-                                            System.out.println("A partir de que montante quer que a recompensa seja oferecida?");
-                                            int mont_aux = entrada.nextInt();
+                                        if (opcao1 == 1) {
+                                            p = new Pedido(user, null, "ADD REWARD", null);
+                                            System.out.println("Quantas Recompensas pretende adicionar ao projecto?");
+                                            int rec = entrada.nextInt();
                                             entrada.nextLine();
-                                            System.out.println("Pretende que a recompensa tenha alternativas? Sim - s; Não - n");
-                                            String altB = entrada.nextLine();
-                                            ArrayList <Alternativa> aA = new ArrayList<>();
-                                            if(altB.equals("s"))
-                                            {
-                                                System.out.println("Quantas?");
-                                                int qtdAlt = entrada.nextInt();
+                                            while (rec > 0) {
+
+                                                System.out.println("Insira uma descrição da Recompensa:");
+                                                String desc_aux = entrada.nextLine();
+                                                System.out.println("A partir de que montante quer que a recompensa seja oferecida?");
+                                                int mont_aux = entrada.nextInt();
                                                 entrada.nextLine();
-                                                while(qtdAlt>0)
-                                                {
+                                                System.out.println("Pretende que a recompensa tenha mais que uma alternativa? Sim - s; Não - n");
+                                                String altB = entrada.nextLine();
+                                                ArrayList<Alternativa> aA = new ArrayList<>();
+                                                if (altB.equals("s")) {
+                                                    System.out.println("Quantas?");
+                                                    int qtdAlt = entrada.nextInt();
+                                                    entrada.nextLine();
+                                                    while (qtdAlt > 0) {
+                                                        System.out.println("Insira uma descrição da alternativa:");
+                                                        Alternativa a = new Alternativa();
+                                                        a.setTipoAlt(entrada.nextLine());
+                                                        aA.add(a);
+                                                        qtdAlt--;
+
+                                                    }
+
+                                                } else if (altB.equals("n")) {
+
                                                     System.out.println("Insira uma descrição da alternativa:");
                                                     Alternativa a = new Alternativa();
                                                     a.setTipoAlt(entrada.nextLine());
                                                     aA.add(a);
-                                                    qtdAlt--;
-
                                                 }
-
+                                                Recompensa_proj rP = new Recompensa_proj(desc_aux, mont_aux);
+                                                rP.setAlt(aA);
+                                                p.getArrayRecompensas().add(rP);
+                                                p.setId_prj(idProjecto);
+                                                rec--;
                                             }
-                                            Recompensa_proj rP = new Recompensa_proj(desc_aux,mont_aux);
-                                            rP.setAlt(aA);
-                                            p.getArrayRecompensas().add(rP);
+                                            lt.send(p);
+                                            Resposta RewAns = lt.receive();
+                                            if (RewAns.resposta.equals("REWARDS ADDED")) {
+                                                System.out.println("Recompensa(s) adicionada(s) com sucesso");
+                                            }
+                                        } else if (opcao1 == 2) {
+                                            System.out.println(idProjecto);
+                                            p = new Pedido(user, null, "LIST REWARDS PROJECT", null);
                                             p.setId_prj(idProjecto);
-                                            rec--;
-                                        }
-                                        lt.send(p);
-                                        Resposta RewAns = lt.receive();
-                                        if(RewAns.resposta.equals("REWARDS ADDED"))
-                                        {
-                                            System.out.println("Recompensa(s) adicionada(s) com sucesso");
-                                        }
-                                    }
-                                    else if(opcao1==2)
-                                    {
-                                        System.out.println(idProjecto);
-                                        p = new Pedido(user,null,"LIST REWARDS PROJECT",null);
-                                        p.setId_prj(idProjecto);
-                                        lt.send(p);
-                                        r = lt.receive();
-                                        System.out.println("Recompensas relativas ao projecto:");
-                                        for(int i = 0;i<r.getRecompensas().size();i++)
-                                        {
+                                            lt.send(p);
+                                            r = lt.receive();
+                                            System.out.println("Recompensas relativas ao projecto:");
+                                            for (int i = 0; i < r.getRecompensas().size(); i++) {
 
-                                            System.out.println("ID: "+r.getRecompensas().get(i).getId_Recompensa()+" "+"Descriçao: "+r.getRecompensas().get(i).getDescricao_Recompensa()+" Montante Necessario: "+r.getRecompensas().get(i).getMontante_Recompensa());
-                                        }
-                                        System.out.println("Insira o ID da recompensa que pretende eliminar:");
-                                        int id_recompensa = entrada.nextInt();
-                                        p = new Pedido(user,null,"REMOVE REWARD",null);
-                                        p.setId_Recompensa(id_recompensa);
-                                        lt.send(p);
-                                        r = lt.receive();
-                                        if(r.resposta.equals("REWARD REMOVED"))
-                                        {
-                                            System.out.println("Recompensa removida com sucesso");
-                                        }
-                                        else if(r.resposta.equals("REWARD REMOVED"))
-                                        {
-                                            System.out.println("ERRO! Recompensa nao removida.");
-                                        }
+                                                System.out.println("ID: " + r.getRecompensas().get(i).getId_Recompensa() + " " + "Descriçao: " + r.getRecompensas().get(i).getDescricao_Recompensa() + " Montante Necessario: " + r.getRecompensas().get(i).getMontante_Recompensa());
+                                            }
+                                            System.out.println("Insira o ID da recompensa que pretende eliminar:");
+                                            int id_recompensa = entrada.nextInt();
+                                            p = new Pedido(user, null, "REMOVE REWARD", null);
+                                            p.setId_Recompensa(id_recompensa);
+                                            lt.send(p);
+                                            r = lt.receive();
+                                            if (r.resposta.equals("REWARD REMOVED")) {
+                                                System.out.println("Recompensa removida com sucesso");
+                                            } else if (r.resposta.equals("REWARD REMOVED")) {
+                                                System.out.println("ERRO! Recompensa nao removida.");
+                                            }
 
+                                        }
                                     }
                                     break;
                                 }
@@ -549,39 +560,8 @@ public class ClienteMenu {
                                     break;
                                 }
 
+
                                 case 11:
-                                {
-                                    System.out.println("Quer ver as mensagens relativas a que projecto?");
-                                    int id = entrada.nextInt();
-                                    entrada.nextLine();
-                                    p = new Pedido(user, null, "SEE PROJECT MESSAGES", null);
-                                    p.setId_prj(id);
-                                    lt.send(p);
-
-                                    Resposta r = lt.receive();
-                                    if (r.resposta.equals("SEE MESSAGES")){
-                                        for (int i = 0; i< r.getMensagems().size(); i++ ){
-                                            System.out.println("ID: " + r.getMensagems().get(i).getId_Mensagem() + "------<> ASSUNTO: " +
-                                                    r.getMensagems().get(i).getAssunto_Mensagem());
-                                        }
-                                    }
-
-                                    System.out.println("Pretende responder a que mensagem?");
-                                    int id_mensagem = entrada.nextInt();
-                                    entrada.nextLine();
-                                    System.out.println("Qual é o assunto? ");
-                                    String assunto = entrada.nextLine();
-                                    System.out.println("Corpo da mensagem: ");
-                                    String corpoMessage = entrada.nextLine();
-                                    p = new Pedido(user, null, "SEND MESSAGE", null);
-                                    p.setAssuntoMessage(assunto);
-                                    p.setCorpoMessage(corpoMessage);
-                                    p.setId_mensagem(id_mensagem);
-                                    p.setTipo_mensagem(1);
-                                    lt.send(p);
-
-                                }
-                                case 13:
                                 {
                                     int idProjecto;
                                     p = new Pedido(user,null,"GET PROJECTS ID USER",null);
@@ -624,7 +604,7 @@ public class ClienteMenu {
 
                                 }
 
-                                case 14:
+                                case 12:
                                 {
                                     int idProjecto;
                                     p = new Pedido(user,null,"GET PROJECTS ID USER",null);
@@ -720,12 +700,16 @@ public class ClienteMenu {
 
 
 class LigacaoTCP{
-    String hostname = "localhost";
-    int port = 6000;
+
+    Informations info = new Informations();
+
+    String hostname = info.getIp_servidorBD();
+    int port = info.getSocket_port();
     Socket s;
 
     public void ligaCliente() {
         try {
+
             s = new Socket(InetAddress.getLocalHost(), port);
             System.out.println("socket: " + s);
 

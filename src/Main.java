@@ -201,6 +201,7 @@ class Connection extends Thread
                     int id_cliente = bd.getIdCliente(pedido.getUsername());
                     if(bd.fazerDoacao(pedido.getId_prj(),pedido.getMontanteDoar(),id_cliente,pedido.getId_Recompensa(),pedido.getId_Voto(),pedido.getnVotos())==0)
                     {
+                        System.out.println(" N VOTOS: "+ pedido.getnVotos());
                         rspDoa = new Resposta("DONATION SUCCESS");
                         sc.send_clients(rspDoa,thread_number);
                     }

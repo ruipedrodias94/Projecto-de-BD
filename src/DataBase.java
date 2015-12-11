@@ -194,8 +194,9 @@ public class DataBase {
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
             e.printStackTrace();
+            return 1;
         }
-        return 0;
+
     }
 
     /**
@@ -518,7 +519,9 @@ public class DataBase {
 
                 //Cria o voto
                 //criarVoto(id_Recompensa, id_Projecto);
+                if(nVotos>0){
                 VotoAlternativa(id_voto);
+                }
 
                 //Recalcula o valor do cliente e faz o update
                 valor_Cliente = valor_Cliente - valor;
@@ -736,9 +739,6 @@ public class DataBase {
             preparedStatement.setInt(2, id_Recompensa);
             if(nVotos!=0) {
                 preparedStatement.setInt(3, id_Voto);
-            }
-            else{
-                preparedStatement.setNull(3, Types.INTEGER);
             }
             preparedStatement.setInt(4, id_Cliente);
             preparedStatement.setInt(5, id_Projecto);
