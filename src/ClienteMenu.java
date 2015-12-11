@@ -101,12 +101,16 @@ public class ClienteMenu {
                                     p = new Pedido(user,null,"GET REWARDS",null);
                                     lt.send(p);
                                     Resposta r = lt.receive();
+                                    if(r.getRecompensas().size()>0){
                                     System.out.println("As recompensas que tem direito neste momento são:");
                                     for(int i=0;i<r.getRecompensas().size();i++)
                                     {
                                         System.out.println("ID Recompensa: "+r.getRecompensas().get(i).getId_Recompensa()+" Descricao: "+r.getRecompensas().get(i).getDescricao_Recompensa());
                                     }
-
+                                    }else
+                                    {
+                                        System.out.println("Não tem recompensas a receber neste momento.");
+                                    }
                                     break;
                                 }
                                 case 5:{
@@ -254,13 +258,14 @@ public class ClienteMenu {
                                     System.out.println("Insira o ID da alternativa que pretende: ");
                                     int idAlternativa = entrada.nextInt();
                                     entrada.nextLine();
-                                        p.setId_Voto(idAlternativa);
+
 
 
                                     p = new Pedido(user,null,"MAKE DONATION",null);
                                     p.setnVotos(aV.size());
                                     p.setId_Recompensa(ID_Recompensa);
                                     p.setId_prj(ID_PROJ);
+                                    p.setId_Voto(idAlternativa);
 
                                     System.out.println("Insira o valor que pretende doar (pode ser mais que a recompensa mas nao pode ser menos): ");
                                     int montante_doacao = entrada.nextInt();
@@ -710,7 +715,7 @@ class LigacaoTCP{
     public void ligaCliente() {
         try {
 
-            s = new Socket(InetAddress.getLocalHost(), port);
+            s = new Socket(InetAddress.getByName(hostname), port);
             System.out.println("socket: " + s);
 
         } catch (IOException e) {

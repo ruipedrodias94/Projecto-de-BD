@@ -297,7 +297,7 @@ public class DataBase {
         String proj = "";
         for (int i = 0; i<projectosAux.size(); i++){
             if (projectosAux.get(i).getEstado() == state){
-                proj = "ID: " + projectosAux.get(i).getId_Projecto() + "  -----<> NOME: "+ projectosAux.get(i).getNome_Projecto() +"\nData Limite: "+projectosAux.get(i).getData_Limite().toString()+" Dinheiro Limite: "+projectosAux.get(i).getDinheiro_Limite()+" Dinheiro Angariado: "+projectosAux.get(i).getDinheiro_Angariado();
+                proj = "ID: " + projectosAux.get(i).getId_Projecto() + " NOME: "+ projectosAux.get(i).getNome_Projecto();
                 projectos_Actuais.add(proj);
             }
         }
@@ -737,9 +737,10 @@ public class DataBase {
                     "VALUES (?,?,?,?,?);");
             preparedStatement.setInt(1, montante);
             preparedStatement.setInt(2, id_Recompensa);
-            if(nVotos!=0) {
-                preparedStatement.setInt(3, id_Voto);
-            }
+            System.out.println("ID VOTO:"+id_Voto);
+
+            preparedStatement.setInt(3, id_Voto);
+
             preparedStatement.setInt(4, id_Cliente);
             preparedStatement.setInt(5, id_Projecto);
 
