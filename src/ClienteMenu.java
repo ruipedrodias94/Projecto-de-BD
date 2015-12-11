@@ -617,6 +617,15 @@ public class ClienteMenu {
                                     p = new Pedido(user,null,"GET PROJECTS ID USER",null);
                                     lt.send(p);
                                     Resposta r = lt.receive();
+                                    int activos = 0;
+                                    for (int i = 0;i<r.getArrProject().size();i++)
+                                    {
+                                        if(r.getArrProject().get(i).getEstado()==1)
+                                        {
+                                            activos++;
+                                        }
+                                    }
+                                    if(activos>0){
                                     for(int i=0;i<r.getArrProject().size();i++)
                                     {
                                         String nomeAux = r.getArrProject().get(i).getNome_Projecto();
@@ -633,8 +642,10 @@ public class ClienteMenu {
                                         {
                                             estadoAux="Inactivo";
                                         }
-                                        System.out.println("ID Projecto: "+idProjecto+" Nome Projecto: "+nomeAux+" Descricao: "+descAux+" Estado: "+estadoAux+" Data Limite: "+r.getArrProject().get(i).getData_Limite()+" Dinheiro Angariado: "+dinAngAux+" Dinheiro Limite: "+dinLimAux+"\n");
-                                    }
+                                        if(r.getArrProject().get(i).getEstado()==1) {
+                                            System.out.println("ID Projecto: " + idProjecto + " Nome Projecto: " + nomeAux + " Descricao: " + descAux + " Estado: " + estadoAux + " Data Limite: " + r.getArrProject().get(i).getData_Limite() + " Dinheiro Angariado: " + dinAngAux + " Dinheiro Limite: " + dinLimAux + "\n");
+                                        }
+                                        }
                                     System.out.println("Insira ID do projecto que pretende finalizar: ");
                                     idProjecto = entrada.nextInt();
                                     entrada.nextLine();
@@ -649,10 +660,15 @@ public class ClienteMenu {
                                     else if(rFP.resposta.equals("PROJECT CONCLUDED"))
                                     {
                                         System.out.println("Projecto Conluído! Dinheiro angariado enviado para o seu saldo!");
+
                                     }
-                                    else if(rFP.resposta.equals("UNKKOWN"))
+                                    else if(rFP.resposta.equals("UNKNOWN"))
                                     {
-                                        System.out.println("ERRO!");
+                                        System.out.println("Projecto ainda nao atingiu a data limite");
+                                    }}
+                                    else
+                                    {
+                                        System.out.println("Não tem projectos activos de momento...");
                                     }
 
                                     break;

@@ -104,174 +104,128 @@ class Connection extends Thread
         this.start();
     }
 
-    public void run()
-    {
+    public void run() {
         try {
-            while(true) {
+            while (true) {
                 //Aqui que se vai fazer o tratamento dos pedidos
                 ois = new ObjectInputStream(ClientSocket.getInputStream());
                 //Chegada de mensagem ---> Tratamento
 
-                Pedido pedido= (Pedido) ois.readObject();
+                Pedido pedido = (Pedido) ois.readObject();
 
-                if(pedido.type.equals("LOGIN"))
-                {
-                    if(bd.login(pedido.username,pedido.password)== true)
-                    {
+                if (pedido.type.equals("LOGIN")) {
+                    if (bd.login(pedido.username, pedido.password) == true) {
                         Resposta respostaLog = new Resposta("SUCCESS LOGIN");
-                        sc.send_clients(respostaLog,thread_number);
-                    }
-                    else{
+                        sc.send_clients(respostaLog, thread_number);
+                    } else {
                         Resposta respostaLog = new Resposta("INSUCCESS LOGIN");
-                        sc.send_clients(respostaLog,thread_number);
+                        sc.send_clients(respostaLog, thread_number);
                     }
-                }
-                else if(pedido.type.equals("REGISTRY"))
-                {
+                } else if (pedido.type.equals("REGISTRY")) {
                     int saldo_inicial = 100;
-                    if(bd.registarConta(pedido.name,pedido.username,pedido.password,saldo_inicial)==0)
-                    {
+                    if (bd.registarConta(pedido.name, pedido.username, pedido.password, saldo_inicial) == 0) {
                         Resposta respostaReg = new Resposta("REGISTRY SUCCESS");
-                        sc.send_clients(respostaReg,thread_number);
-                    }
-                    else if(bd.registarConta(pedido.name,pedido.username,pedido.password,saldo_inicial)==1)
-                    {
+                        sc.send_clients(respostaReg, thread_number);
+                    } else if (bd.registarConta(pedido.name, pedido.username, pedido.password, saldo_inicial) == 1) {
                         Resposta respostaReg = new Resposta("REGISTRY INSUCCESS");
-                        sc.send_clients(respostaReg,thread_number);
+                        sc.send_clients(respostaReg, thread_number);
 
                     }
-                }
-                else if(pedido.type.equals("LIST ALL PROJECTS"))
-                {
+                } else if (pedido.type.equals("LIST ALL PROJECTS")) {
                     Resposta respostaListaProj = new Resposta("SUCCESS LIST");
                     respostaListaProj.Projects = bd.listarProjectos(1);
-                    sc.send_clients(respostaListaProj,thread_number);
-                }
-                else if(pedido.type.equals("LIST ALL PAST PROJECTS"))
-                {
+                    sc.send_clients(respostaListaProj, thread_number);
+                } else if (pedido.type.equals("LIST ALL PAST PROJECTS")) {
                     Resposta respostaListaProj = new Resposta("SUCCESS LIST");
                     respostaListaProj.Projects = bd.listarProjectos(0);
-                    sc.send_clients(respostaListaProj,thread_number);
-                }
-                else if(pedido.type.equals("CHECK BALANCE"))
-                {
+                    sc.send_clients(respostaListaProj, thread_number);
+                } else if (pedido.type.equals("CHECK BALANCE")) {
                     int id_cliente = bd.getIdCliente(pedido.username);
                     int saldo = bd.consultarSaldo(id_cliente);
                     Resposta rSaldo = new Resposta("BALANCE SUCESS");
                     rSaldo.setSaldo(saldo);
-                    sc.send_clients(rSaldo,thread_number);
-                }
-                else if(pedido.type.equals("CHECK PROJECT EXISTS"))
-                {
-                    if(bd.projectExists(pedido.getProjectName())==false)
-                    {
+                    sc.send_clients(rSaldo, thread_number);
+                } else if (pedido.type.equals("CHECK PROJECT EXISTS")) {
+                    if (bd.projectExists(pedido.getProjectName()) == false) {
                         Resposta RPrjName = new Resposta("PROJECT NAME OK");
-                        sc.send_clients(RPrjName,thread_number);
-                    }
-                    else
-                    {
+                        sc.send_clients(RPrjName, thread_number);
+                    } else {
                         Resposta RPrjName = new Resposta("PROJECT NAME ALREADY TAKEN");
-                        sc.send_clients(RPrjName,thread_number);
+                        sc.send_clients(RPrjName, thread_number);
                     }
-                }
-                else if(pedido.type.equals("NEW PROJECT"))
-                {
+                } else if (pedido.type.equals("NEW PROJECT")) {
 
-                    String data = Integer.toString(pedido.getYear())+"-"+Integer.toString(pedido.getMonth())+"-"+Integer.toString(pedido.getDay());
+                    String data = Integer.toString(pedido.getYear()) + "-" + Integer.toString(pedido.getMonth()) + "-" + Integer.toString(pedido.getDay());
                     String CriaPrj = bd.criarProjecto(pedido.getProjectName(), pedido.getDescriptionProject(), data, bd.getIdCliente(pedido.username), pedido.limit_cash, pedido.getArrayRecompensas());
                     Resposta rspCriaProj = new Resposta(CriaPrj);
-                    sc.send_clients(rspCriaProj,thread_number);
-                }
-                else if(pedido.type.equals("LIST REWARDS PROJECT"))
-                {
+                    sc.send_clients(rspCriaProj, thread_number);
+                } else if (pedido.type.equals("LIST REWARDS PROJECT")) {
                     Resposta RwrdPrj = new Resposta("PRJ REWARDS LIST");
                     RwrdPrj.setRecompensas(bd.getRecompensasIDProj(pedido.getId_prj()));
-                    sc.send_clients(RwrdPrj,thread_number);
-                }
-                else if(pedido.type.equals("LIST ALTERNATIVES"))
-                {
+                    sc.send_clients(RwrdPrj, thread_number);
+                } else if (pedido.type.equals("LIST ALTERNATIVES")) {
                     Resposta RspAlt = new Resposta("ALTERNATIVES LIST");
                     RspAlt.setArrayAlter(bd.getAltIdRecompensa(pedido.getId_Recompensa()));
-                    sc.send_clients(RspAlt,thread_number);
+                    sc.send_clients(RspAlt, thread_number);
 
-                }
-                else if(pedido.type.equals("MAKE DONATION"))
-                {
+                } else if (pedido.type.equals("MAKE DONATION")) {
                     Resposta rspDoa;
                     int id_cliente = bd.getIdCliente(pedido.getUsername());
-                    if(bd.fazerDoacao(pedido.getId_prj(),pedido.getMontanteDoar(),id_cliente,pedido.getId_Recompensa(),pedido.getId_Voto(),pedido.getnVotos())==0)
-                    {
-                        System.out.println(" N VOTOS: "+ pedido.getnVotos());
+                    if (bd.fazerDoacao(pedido.getId_prj(), pedido.getMontanteDoar(), id_cliente, pedido.getId_Recompensa(), pedido.getId_Voto(), pedido.getnVotos()) == 0) {
+                        System.out.println(" N VOTOS: " + pedido.getnVotos());
                         rspDoa = new Resposta("DONATION SUCCESS");
-                        sc.send_clients(rspDoa,thread_number);
-                    }
-                    else
-                    {
+                        sc.send_clients(rspDoa, thread_number);
+                    } else {
                         rspDoa = new Resposta("DONATION INSUCCESS");
-                        sc.send_clients(rspDoa,thread_number);
+                        sc.send_clients(rspDoa, thread_number);
                     }
-                }
-                else if(pedido.type.equals("GET REWARDS"))
-                {
+                } else if (pedido.type.equals("GET REWARDS")) {
                     Resposta rspRew;
                     rspRew = new Resposta("REWARDS GETTED");
                     int id_cliente = bd.getIdCliente(pedido.getUsername());
                     rspRew.setRecompensas(bd.getRecompensasIDCliente(id_cliente));
-                    sc.send_clients(rspRew,thread_number);
-                }
-                else if(pedido.type.equals("LIST PROJECT DETAILS"))
-                {
+                    sc.send_clients(rspRew, thread_number);
+                } else if (pedido.type.equals("LIST PROJECT DETAILS")) {
                     Resposta r = new Resposta("PROJECT DETAILS");
                     r.setArrProject(bd.listarDetalhes_Projecto(pedido.getId_prj()));
-                    sc.send_clients(r,thread_number);
-                }
-                else if(pedido.type.equals("GET PROJECTS ID USER"))
-                {
+                    sc.send_clients(r, thread_number);
+                } else if (pedido.type.equals("GET PROJECTS ID USER")) {
                     Resposta r = new Resposta("USER PROJECTS");
                     r.setArrProject(bd.getProjectosIDUser(bd.getIdCliente(pedido.getUsername())));
-                    sc.send_clients(r,thread_number);
-                }
-                else if (pedido.type.equals("GET PROJECTS"))
-                {
+                    sc.send_clients(r, thread_number);
+                } else if (pedido.type.equals("GET PROJECTS")) {
                     Resposta r = new Resposta("GET ALL PROJECTS");
                     r.setArrProject(bd.getProjectos());
                     r.setIdCliente(bd.getIdCliente(pedido.username));
-                    sc.send_clients(r,thread_number);
-                }
-                else if (pedido.type.equals("SEND MESSAGE"))
-                {
+                    sc.send_clients(r, thread_number);
+                } else if (pedido.type.equals("SEND MESSAGE")) {
                     int r = bd.sendMessage(bd.getIdCliente(pedido.username), pedido.getId_prj(), bd.getIdCliente_Proj(pedido.getId_prj()), pedido.getAssuntoMessage(), pedido.getCorpoMessage(), 1);
-                    if(r == 1){
+                    if (r == 1) {
                         Resposta resp = new Resposta("MESSAGE SUCESS");
                         sc.send_clients(resp, thread_number);
-                    }else{
+                    } else {
                         Resposta resp = new Resposta("MESSAGE INSUCESS");
                         sc.send_clients(resp, thread_number);
                     }
-                }
-                else if (pedido.type.equals("ANSWER MESSAGE")){
-                    int r = bd.sendMessage(bd.getIdCliente(pedido.username),bd.getIdProjByMessage(pedido.getId_mensagem()),bd.getIdRecebeByMessage(pedido.getId_mensagem()),
-                            pedido.getAssuntoMessage(),pedido.getCorpoMessage(),pedido.getTipo_mensagem());
-                    if(r == 1){
+                } else if (pedido.type.equals("ANSWER MESSAGE")) {
+                    int r = bd.sendMessage(bd.getIdCliente(pedido.username), bd.getIdProjByMessage(pedido.getId_mensagem()), bd.getIdRecebeByMessage(pedido.getId_mensagem()),
+                            pedido.getAssuntoMessage(), pedido.getCorpoMessage(), pedido.getTipo_mensagem());
+                    if (r == 1) {
                         Resposta resp = new Resposta("MESSAGE SUCESS");
                         sc.send_clients(resp, thread_number);
-                    }else{
+                    } else {
                         Resposta resp = new Resposta("MESSAGE INSUCESS");
                         sc.send_clients(resp, thread_number);
                     }
 
-                }
-                else if (pedido.type.equals("SEE PROJECT MESSAGES BY USER")){
+                } else if (pedido.type.equals("SEE PROJECT MESSAGES BY USER")) {
                     Resposta resposta = new Resposta("SEE MESSAGES");
                     ArrayList<Mensagem> mensagemsProj = bd.getMessages(bd.getIdCliente(pedido.username));
                     resposta.setMensagems(mensagemsProj);
                     sc.send_clients(resposta, thread_number);
-                }
-                 else if(pedido.type.equals("ADD REWARD"))
-                {
+                } else if (pedido.type.equals("ADD REWARD")) {
                     Resposta r = new Resposta("REWARDS ADDED");
-                    for(int i = 0;i< pedido.getArrayRecompensas().size();i++)
-                    {
+                    for (int i = 0; i < pedido.getArrayRecompensas().size(); i++) {
                         String descricao;
                         int montante;
                         int id_Projecto;
@@ -281,56 +235,43 @@ class Connection extends Thread
                         montante = pedido.getArrayRecompensas().get(i).montante;
                         id_Projecto = pedido.getId_prj();
                         bd.criarRecompensa(descricao, montante, id_Projecto);
-                        for(int j=0;j<pedido.getArrayRecompensas().get(i).alt.size();j++){
+                        for (int j = 0; j < pedido.getArrayRecompensas().get(i).alt.size(); j++) {
                             System.out.println(pedido.getArrayRecompensas().get(i).alt.get(j).getTipoAlt());
-                            bd.criarVoto(bd.getIdRecompensa(id_Projecto,pedido.getArrayRecompensas().get(i).description),id_Projecto,pedido.getArrayRecompensas().get(i).alt.get(j).getTipoAlt());
+                            bd.criarVoto(bd.getIdRecompensa(id_Projecto, pedido.getArrayRecompensas().get(i).description), id_Projecto, pedido.getArrayRecompensas().get(i).alt.get(j).getTipoAlt());
                         }
                     }
-                    sc.send_clients(r,thread_number);
-                }
-                 else if(pedido.type.equals("REMOVE REWARD"))
-                {
+                    sc.send_clients(r, thread_number);
+                } else if (pedido.type.equals("REMOVE REWARD")) {
                     Resposta r1;
-                    if(bd.deleteRecompensa(pedido.getId_Recompensa())==0){
-                    r1 = new Resposta("REWARD REMOVED");
-                    }
-                    else{
+                    if (bd.deleteRecompensa(pedido.getId_Recompensa()) == 0) {
+                        r1 = new Resposta("REWARD REMOVED");
+                    } else {
                         r1 = new Resposta("REWARD NOT REMOVED");
                     }
-                    sc.send_clients(r1,thread_number);
+                    sc.send_clients(r1, thread_number);
 
-                }else if(pedido.type.equals("CANCEL PROJECT"))
-                 {
-                     int result = bd.cancelarProjecto(pedido.getId_prj());
-                     Resposta r = new Resposta("");
-                     if(result==1)
-                     {
-                         r = new Resposta("PROJECT NOT CANCELED");
-                     }
-                     else if(result==0)
-                     {
-                         r = new Resposta("PROJECT CANCELED");
-                     }
-                     sc.send_clients(r,thread_number);
-                 }
-                else if(pedido.type.equals("PROJECT FINALIZATION"))
-                {
-                    Resposta r=null;
-                    int respostaBD = bd.finalizarProjecto(pedido.getId_prj());
-                    System.out.println("RespostaBD: "+respostaBD);
-                    if(respostaBD==1)
-                    {
+                } else if (pedido.type.equals("CANCEL PROJECT")) {
+                    int result = bd.cancelarProjecto(pedido.getId_prj());
+                    Resposta r = new Resposta("");
+                    if (result == 1) {
+                        r = new Resposta("PROJECT NOT CANCELED");
+                    } else if (result == 0) {
                         r = new Resposta("PROJECT CANCELED");
                     }
-                    else if(respostaBD == 0)
-                    {
+                    sc.send_clients(r, thread_number);
+                } else if (pedido.type.equals("PROJECT FINALIZATION")) {
+                    Resposta r = null;
+                    int respostaBD = bd.finalizarProjecto(pedido.getId_prj());
+                    System.out.println("RespostaBD: " + respostaBD);
+                    if (respostaBD == 1) {
+                        r = new Resposta("PROJECT CANCELED");
+                    } else if (respostaBD == 0) {
                         r = new Resposta("PROJECT CONCLUDED");
-                    }
-                    else if(respostaBD == 2)
-                    {
+
+                    } else if (respostaBD == 2) {
                         r = new Resposta("UNKNOWN");
                     }
-                    sc.send_clients(r,thread_number);
+                    sc.send_clients(r, thread_number);
                 }
 
 
@@ -350,10 +291,7 @@ class Connection extends Thread
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-    }
-
-}
+    }}
 
 class Shared_Clients {
     public static ArrayList<Socket> clientes = new ArrayList<Socket>();
@@ -382,6 +320,37 @@ class Shared_Clients {
     }
 }
 
+class VotoGAnhou implements Serializable
+{
+    int nvotos;
+    String descRecom;
+    String descAlter;
+
+    public int getNvotos() {
+        return nvotos;
+    }
+
+    public void setNvotos(int nvotos) {
+        this.nvotos = nvotos;
+    }
+
+    public String getDescRecom() {
+        return descRecom;
+    }
+
+    public void setDescRecom(String descRecom) {
+        this.descRecom = descRecom;
+    }
+
+    public String getDescAlter() {
+        return descAlter;
+    }
+
+    public void setDescAlter(String descAlter) {
+        this.descAlter = descAlter;
+    }
+}
+
 class Resposta implements Serializable
 {
     String resposta;
@@ -390,6 +359,8 @@ class Resposta implements Serializable
     ArrayList <Voto> arrayAlter;
     ArrayList <Projecto> ArrProject;
     private ArrayList <Mensagem> mensagems;
+    ArrayList <VotoGAnhou> ArrVG;
+
 
     public ArrayList<Projecto> getArrProject() {
         return ArrProject;
@@ -460,6 +431,49 @@ class Voto implements Serializable
 {
     int idVoto;
     String descricao;
+    int id_recompensa;
+    int ProjectID;
+    int numvotos;
+
+    public int getIdVoto() {
+        return idVoto;
+    }
+
+    public void setIdVoto(int idVoto) {
+        this.idVoto = idVoto;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public int getId_recompensa() {
+        return id_recompensa;
+    }
+
+    public void setId_recompensa(int id_recompensa) {
+        this.id_recompensa = id_recompensa;
+    }
+
+    public int getProjectID() {
+        return ProjectID;
+    }
+
+    public void setProjectID(int projectID) {
+        ProjectID = projectID;
+    }
+
+    public int getNumvotos() {
+        return numvotos;
+    }
+
+    public void setNumvotos(int numvotos) {
+        this.numvotos = numvotos;
+    }
 
     public Voto(int idVoto, String desc) {
         this.idVoto = idVoto;

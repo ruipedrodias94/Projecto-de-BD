@@ -643,6 +643,26 @@ public class DataBase {
 
     }
 
+    public synchronized ArrayList<Voto> getVotosIDProj(int IDProjecto) throws SQLException {
+        ArrayList<Voto> VotosAux = new ArrayList<>();
+        Voto voto;
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(" SELECT *  FROM proj_bd.voto WHERE Projecto_idProjecto='"+IDProjecto+"';");
+
+            while (resultSet.next()){
+                voto = new Voto(resultSet.getInt(1),resultSet.getString(5));
+                voto.setId_recompensa(resultSet.getInt(2));
+                voto.setProjectID(resultSet.getInt(3));
+                voto.setNumvotos(resultSet.getInt(4));
+                VotosAux.add(voto);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return VotosAux;
+    }
+
     public synchronized ArrayList<Recompensa> getRecompensasIDCliente(int IDCliente) throws SQLException {
         ArrayList<Doacao> DoacoesAux = new ArrayList<>();
         ArrayList<Recompensa> recompensasAux = new ArrayList<>();
@@ -823,10 +843,13 @@ public class DataBase {
         ArrayList<Doacao> doacoes = getDoacoes(id_Projecto);
         int saldo_Cliente = 0;
         try {
+            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(" UPDATE proj_bd.projecto SET estado = 0 WHERE idProjecto = " + id_Projecto + ";");
             preparedStatement.executeUpdate();
+            connection.commit();
 
         }catch (SQLException e){
+            connection.rollback();
             System.out.println(e.getLocalizedMessage());
             return 1;
         }
@@ -926,26 +949,30 @@ public class DataBase {
                     cancelarProjecto(idProjecto);
                     return 1;
                  }
-                else
-                {
+                else {
                     //Projecto chegou ao pretendido
                     int saldoDono = consultarSaldo(projectoActual.getCliente_idCliente());
                     saldoDono = saldoDono + projectoActual.getDinheiro_Angariado();
                     updateSaldoCliente(projectoActual.getCliente_idCliente(), saldoDono);
                     inactivarProjecto(idProjecto);
                     System.out.println("Projecto concluido: dinheiro enviado para a conta do dono");
+                    ArrayList<Recompensa> ArrayRecompensa = getRecompensasIDProj(idProjecto);
                     return 0;
+
+                    }
+
 
 
                 }
 
 
-        }
+
 
 
         return 2;
 
     }
+
 
     /**
      * Metodo para enviar mensagens para um projecto ou para um cliente
