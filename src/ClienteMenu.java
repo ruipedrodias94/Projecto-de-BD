@@ -2,8 +2,10 @@
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 
 /**
  * Created by jorgearaujo on 01/12/15.
@@ -467,7 +469,7 @@ public class ClienteMenu {
                                             for (int i = 0; i < aux.size(); i++){
                                                 System.out.println("ID: " + aux.get(i).getId_Projecto() +
                                                         "\nNOME: " + aux.get(i).getNome_Projecto() +
-                                                        "===============");
+                                                        "\n===============");
                                             }
                                         }
 
@@ -725,31 +727,40 @@ class LigacaoTCP{
 
     public void send(Pedido r){
 
+
+
         try {
             OutputStream os = s.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(os);
             oos.writeObject(r);
         } catch (IOException e) {
+            System.out.println("Falha de rede");
             e.printStackTrace();
+
         }
     }
 
     public Resposta receive()
     {    ObjectInputStream ois = null;
         Resposta r = null;
+
         try {
             InputStream in = s.getInputStream();
+            s.setSoTimeout(3000);
             ois = new ObjectInputStream(in);
             r = (Resposta) ois.readObject();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        } catch (SocketException e) {
+            System.out.println("Falha longa de rede - Tentativa de reconexão!");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return r;
+        }
     }
-}
+
 
 class Pedido implements Serializable
 {

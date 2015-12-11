@@ -39,6 +39,8 @@ public class DataBase {
      * @throws SQLException
      */
     public synchronized void ConnectDataBase() throws SQLException{
+        Informations info = new Informations();
+
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -50,7 +52,8 @@ public class DataBase {
         System.out.println("[DATABASE] Oracle JDBC driver instalada");
 
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "pass");
+
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root",info.getUser(),info.getPass());
         }catch (SQLException e){
             System.out.println("Falhou a fazer a connexao a base de dados!");
             System.out.println(e.getLocalizedMessage());
