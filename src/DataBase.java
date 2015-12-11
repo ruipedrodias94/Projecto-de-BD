@@ -113,6 +113,26 @@ public class DataBase {
 
     /**
      * Metodo para verificar o id de um projecto através do nome do projecto
+     * @param idProjecto
+     * @return
+     * @throws SQLException
+     */
+    //Get o id do projecto
+    public synchronized Projecto getProjetoID(int idProjecto) throws SQLException{
+        int id = 0;
+        Projecto pAux = null;
+        ArrayList<Projecto> projectosAux = getProjectos();
+        for (int i = 0; i < projectosAux.size(); i++){
+            if(projectosAux.get(i).getId_Projecto()== idProjecto){
+                pAux = projectosAux.get(i);
+            }
+        }
+        return pAux;
+    }
+
+
+    /**
+     * Metodo para verificar o id de um projecto através do nome do projecto
      * @param nomeProjecto
      * @return
      * @throws SQLException
@@ -383,10 +403,11 @@ public class DataBase {
             System.out.println("MONTANTE A PARTIR DO QUAL O CLIENTE RECEBER A RECOMPENSA: ");
             montante = ARP.get(i).montante;
             criarRecompensa(descricao, montante, id_Projecto);
+            if(ARP.get(i).alt.size()>0){
             for(int j=0;j<ARP.get(i).alt.size();j++){
                 System.out.println(ARP.get(i).alt.get(j).getTipoAlt());
                 criarVoto(getIdRecompensa(id_Projecto,ARP.get(i).description),id_Projecto,ARP.get(i).alt.get(j).getTipoAlt());
-            }
+            }}
 
         }
 
@@ -477,7 +498,7 @@ public class DataBase {
      */
     //Inacabada
     //Fazer doação ao projecto
-    public synchronized int fazerDoacao(int id_Projecto, int valor, int id_Cliente,int id_Recompensa,int id_voto) throws SQLException {
+    public synchronized int fazerDoacao(int id_Projecto, int valor, int id_Cliente,int id_Recompensa,int id_voto, int nVotos) throws SQLException {
         int valor_Cliente, valor_Projecto;
         ArrayList<Recompensa> recompensas = getRecompensas();
 
@@ -493,7 +514,7 @@ public class DataBase {
                 System.out.println("DE ACORDO COM O VALOR QUE QUER DOAR, ESTAS SAO AS RECOMPENSAS DISPONIVEIS PARA VOTAR. " +
                         "ATENCAO QUE A RECOMPENSA EM QUE VOTAR VAI SER A QUE LHE VAI FICAR ATRIBUIDA");
 
-                criarDoacao(valor, id_Recompensa, id_voto, id_Cliente, id_Projecto);
+                criarDoacao(valor, id_Recompensa, id_voto, id_Cliente, id_Projecto, nVotos);
 
                 //Cria o voto
                 //criarVoto(id_Recompensa, id_Projecto);
@@ -528,7 +549,7 @@ public class DataBase {
         n_votos++;
         try {
             connection.setAutoCommit(false);
-            preparedStatement = connection.prepareStatement(" UPDATE proj_bd.voto SET num_Votos = "+n_votos+" WHERE idVoto = "+id_Voto+";");
+            preparedStatement = connection.prepareStatement(" UPDATE proj_bd.voto SET num_Votos = " + n_votos + " WHERE idVoto = " + id_Voto + ";");
             preparedStatement.executeUpdate();
 
             connection.commit();
@@ -706,14 +727,19 @@ public class DataBase {
 
     //Criar doacao
     //Exemplo 1
-    public synchronized void criarDoacao(int montante, int id_Recompensa,int id_Voto, int id_Cliente,  int id_Projecto) throws SQLException{
+    public synchronized void criarDoacao(int montante, int id_Recompensa,int id_Voto, int id_Cliente,  int id_Projecto, int nVotos) throws SQLException{
         try {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(" INSERT INTO proj_bd.doacao (montante,Recompensa_idRecompensa,Voto_idVoto , Cliente_idCliente,Projecto_idProjecto)" +
                     "VALUES (?,?,?,?,?);");
             preparedStatement.setInt(1, montante);
             preparedStatement.setInt(2, id_Recompensa);
-            preparedStatement.setInt(3, id_Voto);
+            if(nVotos!=0) {
+                preparedStatement.setInt(3, id_Voto);
+            }
+            else{
+                preparedStatement.setNull(3, Types.INTEGER);
+            }
             preparedStatement.setInt(4, id_Cliente);
             preparedStatement.setInt(5, id_Projecto);
 
@@ -766,6 +792,21 @@ public class DataBase {
         }
         return id_Voto;
     }
+
+    // Por projecto incativo
+    public synchronized int inactivarProjecto(int id_Projecto) throws SQLException {
+        try {
+            preparedStatement = connection.prepareStatement(" UPDATE proj_bd.projecto SET estado = 0 WHERE idProjecto = " + id_Projecto + ";");
+            preparedStatement.executeUpdate();
+
+        }catch (SQLException e){
+            System.out.println(e.getLocalizedMessage());
+            return 1;
+        }
+
+       return 0;
+    }
+
 
     //Cancelar projecto
     /**
@@ -868,50 +909,36 @@ public class DataBase {
         Date dataActualFormatada = sdf.parse(data_actual2);
         int dinheiro_Actual = 0;
         int dinheiro_Limite= 0;
-        Projecto projectoActual = null;
+        Projecto projectoActual = getProjetoID(idProjecto);
 
-        for (int i = 0; i<projectos.size(); i++){
-            String data_Projecto = sdf.format(projectos.get(i).getData_Limite());
+
+            String data_Projecto = sdf.format(projectoActual.getData_Limite());
             Date dataProjecto2 = sdf.parse(data_Projecto);
             System.out.println("RESULTADO: "+dataActualFormatada.after(dataProjecto2));
             if(dataActualFormatada.after(dataProjecto2)){
-                if(projectos.get(i).getDinheiro_Angariado()<projectos.get(i).getDinheiro_Limite()){
-                    naoCumpriram.add(projectos.get(i).getId_Projecto());
+                //Projecto não chegou ao cashé pretendido
+                if(projectoActual.getDinheiro_Angariado()<projectoActual.getDinheiro_Limite()){
+                    System.out.println("Projecto com o id: "+idProjecto+"cancelado  ");
+                    cancelarProjecto(idProjecto);
+                    return 1;
+                 }
+                else
+                {
+                    //Projecto chegou ao pretendido
+                    int saldoDono = consultarSaldo(projectoActual.getCliente_idCliente());
+                    saldoDono = saldoDono + projectoActual.getDinheiro_Angariado();
+                    updateSaldoCliente(projectoActual.getCliente_idCliente(), saldoDono);
+                    inactivarProjecto(idProjecto);
+                    System.out.println("Projecto concluido: dinheiro enviado para a conta do dono");
+                    return 0;
+
+
                 }
-            }
-        }
-        System.out.println("TAM:"+naoCumpriram.size());
-        System.out.println("ID PRJ:"+idProjecto);
 
-        for (int i = 0; i<naoCumpriram.size(); i++){
-            System.out.println("IDS: "+naoCumpriram.get(i));
-            if(naoCumpriram.get(i)==idProjecto)
-            {
-                cancelarProjecto(naoCumpriram.get(i));
-                System.out.println("Cancelado projecto com id"+naoCumpriram.get(i));
-                return 0;
-            }
-        }
-        for(int i = 0;i<projectos.size();i++)
-        {
-            if(projectos.get(i).getId_Projecto() == idProjecto)
-            {
-                projectoActual = projectos.get(i);
-            }
+
         }
 
-        //TODO Alterar para ficar transaccional
-        if(dataActualFormatada.after(projectoActual.getData_Limite()))
-        {
-            if(projectoActual.getDinheiro_Angariado()>=projectoActual.getDinheiro_Limite())
-            {
-                int saldoDono = consultarSaldo(projectoActual.getCliente_idCliente());
-                saldoDono = saldoDono + projectoActual.getDinheiro_Angariado();
-                updateSaldoCliente(projectoActual.getCliente_idCliente(), saldoDono);
-                System.out.println("Projecto concluido: dinheiro enviado para a conta do dono");
-                return 1;
-            }
-        }
+
         return 2;
 
     }

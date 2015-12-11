@@ -199,7 +199,7 @@ class Connection extends Thread
                 {
                     Resposta rspDoa;
                     int id_cliente = bd.getIdCliente(pedido.getUsername());
-                    if(bd.fazerDoacao(pedido.getId_prj(),pedido.getMontanteDoar(),id_cliente,pedido.getId_Recompensa(),pedido.getId_Voto())==0)
+                    if(bd.fazerDoacao(pedido.getId_prj(),pedido.getMontanteDoar(),id_cliente,pedido.getId_Recompensa(),pedido.getId_Voto(),pedido.getnVotos())==0)
                     {
                         rspDoa = new Resposta("DONATION SUCCESS");
                         sc.send_clients(rspDoa,thread_number);
@@ -317,11 +317,11 @@ class Connection extends Thread
                     Resposta r=null;
                     int respostaBD = bd.finalizarProjecto(pedido.getId_prj());
                     System.out.println("RespostaBD: "+respostaBD);
-                    if(respostaBD==0)
+                    if(respostaBD==1)
                     {
                         r = new Resposta("PROJECT CANCELED");
                     }
-                    else if(respostaBD == 1)
+                    else if(respostaBD == 0)
                     {
                         r = new Resposta("PROJECT CONCLUDED");
                     }

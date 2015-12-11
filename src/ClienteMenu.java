@@ -239,17 +239,25 @@ public class ClienteMenu {
                                     ArrayList <Voto> aV = new ArrayList<>();
                                     r = lt.receive();
                                     aV = r.getArrayAlter();
+                                    if(aV.size()>0){
                                     for(int i = 0 ;i<aV.size();i++)
                                     {
+                                        p.setnVotos(aV.size());
                                         System.out.println(" ID Aternativa: "+aV.get(i).idVoto+" Descricao: "+aV.get(i).descricao);
                                     }
                                     System.out.println("Insira o ID da alternativa que pretende: ");
                                     int idAlternativa = entrada.nextInt();
                                     entrada.nextLine();
+                                        p.setId_Voto(idAlternativa);
+                                    }
+                                    else
+                                    {
+                                        p.setnVotos(0);
+                                    }
                                     p = new Pedido(user,null,"MAKE DONATION",null);
                                     p.setId_Recompensa(ID_Recompensa);
                                     p.setId_prj(ID_PROJ);
-                                    p.setId_Voto(idAlternativa);
+
                                     System.out.println("Insira o valor que pretende doar (pode ser mais que a recompensa mas nao pode ser menos): ");
                                     int montante_doacao = entrada.nextInt();
                                     entrada.nextLine();
@@ -762,6 +770,15 @@ class Pedido implements Serializable
     String name;
     String projectName;
     String DescriptionProject;
+    int nVotos;
+
+    public int getnVotos() {
+        return nVotos;
+    }
+
+    public void setnVotos(int nVotos) {
+        this.nVotos = nVotos;
+    }
 
     private int messageSucess;
     String assuntoMessage;
