@@ -18,6 +18,7 @@ public class DataBase {
     Statement statement = null;
     ResultSet resultSet = null;
     PreparedStatement preparedStatement = null;
+    CallableStatement callableStatement = null;
 
     private int FALSE = 0;
     private int TRUE = 1;
@@ -50,7 +51,7 @@ public class DataBase {
         System.out.println("[DATABASE] Oracle JDBC driver instalada");
 
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "pass");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/?user=root","root", "root");
         }catch (SQLException e){
             System.out.println("Falhou a fazer a connexao a base de dados!");
             System.out.println(e.getLocalizedMessage());
@@ -85,16 +86,19 @@ public class DataBase {
     public synchronized int getIdCliente(String username) throws SQLException{
         int id = 0;
         try{
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM proj_bd.cliente WHERE user_Name = '" + username + "';");
-            while (resultSet.next()){
-                id = resultSet.getInt(1);
+            String getDBUSERByUserIdSql = "{CALL proj_bd.verId(?)}";
+            callableStatement = connection.prepareCall(getDBUSERByUserIdSql);
+            callableStatement.setString(1, username);
+            callableStatement.executeUpdate();
+            ResultSet rs = callableStatement.getResultSet();
+            while (rs.next()) {
+                id = rs.getInt(1);
             }
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-        return id;
+    }catch (SQLException e){
+        e.printStackTrace();
     }
+    return id;
+}
 
     //Get o id do projecto
     public synchronized int getNVotosAlt(int id_voto) throws SQLException{
@@ -405,10 +409,10 @@ public class DataBase {
             montante = ARP.get(i).montante;
             criarRecompensa(descricao, montante, id_Projecto);
             if(ARP.get(i).alt.size()>0){
-            for(int j=0;j<ARP.get(i).alt.size();j++){
-                System.out.println(ARP.get(i).alt.get(j).getTipoAlt());
-                criarVoto(getIdRecompensa(id_Projecto,ARP.get(i).description),id_Projecto,ARP.get(i).alt.get(j).getTipoAlt());
-            }}
+                for(int j=0;j<ARP.get(i).alt.size();j++){
+                    System.out.println(ARP.get(i).alt.get(j).getTipoAlt());
+                    criarVoto(getIdRecompensa(id_Projecto,ARP.get(i).description),id_Projecto,ARP.get(i).alt.get(j).getTipoAlt());
+                }}
 
         }
 
@@ -520,7 +524,7 @@ public class DataBase {
                 //Cria o voto
                 //criarVoto(id_Recompensa, id_Projecto);
                 if(nVotos>0){
-                VotoAlternativa(id_voto);
+                    VotoAlternativa(id_voto);
                 }
 
                 //Recalcula o valor do cliente e faz o update
@@ -805,7 +809,7 @@ public class DataBase {
             return 1;
         }
 
-       return 0;
+        return 0;
     }
 
 
@@ -913,28 +917,28 @@ public class DataBase {
         Projecto projectoActual = getProjetoID(idProjecto);
 
 
-            String data_Projecto = sdf.format(projectoActual.getData_Limite());
-            Date dataProjecto2 = sdf.parse(data_Projecto);
-            System.out.println("RESULTADO: "+dataActualFormatada.after(dataProjecto2));
-            if(dataActualFormatada.after(dataProjecto2)){
-                //Projecto não chegou ao cashé pretendido
-                if(projectoActual.getDinheiro_Angariado()<projectoActual.getDinheiro_Limite()){
-                    System.out.println("Projecto com o id: "+idProjecto+"cancelado  ");
-                    cancelarProjecto(idProjecto);
-                    return 1;
-                 }
-                else
-                {
-                    //Projecto chegou ao pretendido
-                    int saldoDono = consultarSaldo(projectoActual.getCliente_idCliente());
-                    saldoDono = saldoDono + projectoActual.getDinheiro_Angariado();
-                    updateSaldoCliente(projectoActual.getCliente_idCliente(), saldoDono);
-                    inactivarProjecto(idProjecto);
-                    System.out.println("Projecto concluido: dinheiro enviado para a conta do dono");
-                    return 0;
+        String data_Projecto = sdf.format(projectoActual.getData_Limite());
+        Date dataProjecto2 = sdf.parse(data_Projecto);
+        System.out.println("RESULTADO: "+dataActualFormatada.after(dataProjecto2));
+        if(dataActualFormatada.after(dataProjecto2)){
+            //Projecto não chegou ao cashé pretendido
+            if(projectoActual.getDinheiro_Angariado()<projectoActual.getDinheiro_Limite()){
+                System.out.println("Projecto com o id: "+idProjecto+"cancelado  ");
+                cancelarProjecto(idProjecto);
+                return 1;
+            }
+            else
+            {
+                //Projecto chegou ao pretendido
+                int saldoDono = consultarSaldo(projectoActual.getCliente_idCliente());
+                saldoDono = saldoDono + projectoActual.getDinheiro_Angariado();
+                updateSaldoCliente(projectoActual.getCliente_idCliente(), saldoDono);
+                inactivarProjecto(idProjecto);
+                System.out.println("Projecto concluido: dinheiro enviado para a conta do dono");
+                return 0;
 
 
-                }
+            }
 
 
         }
@@ -1003,7 +1007,7 @@ public class DataBase {
             resultSet = statement.executeQuery("SELECT Cliente_idCliente_Envia" +
                     " FROM proj_bd.mensagem WHERE idMensagem = "+ idMessage + ";");
             while (resultSet.next()){
-               id = resultSet.getInt(1);
+                id = resultSet.getInt(1);
             }
         }catch (SQLException e){
             System.out.println(e.getLocalizedMessage());
