@@ -51,6 +51,7 @@ public class ClienteMenu {
                             System.out.println("10 - Ver Caixa de entrada");
                             System.out.println("13 - Cancelar Projecto");
                             System.out.println("14 - Finalizar Projecto");
+                            System.out.println("0 - Sair");
                             System.out.println("\n");
                             opcao = entrada.nextInt();
                             switch (opcao)
@@ -421,10 +422,10 @@ public class ClienteMenu {
 
                                 case 9:
                                 {
-                                    System.out.println("Pretende enviar para um projecto ou responder a um Cliente? e - enviar / r - responder");
-                                    String escolha = entrada.nextLine();
+                                    System.out.println("Pretende enviar para um projecto ou para um Cliente? P - Projecto / C - Cliente");
+                                    String escolha = entrada.next();
                                     entrada.nextLine();
-                                    if(escolha.equals("e")){
+                                    if(escolha.matches("P")){
                                         p = new Pedido(user,null,"GET PROJECTS",null);
                                         lt.send(p);
                                         Resposta r = lt.receive();
@@ -436,7 +437,7 @@ public class ClienteMenu {
                                             }
                                         }
                                         if(aux.size() == 0){
-                                            System.out.println("Não tem projectos para enviar mensagens");
+                                            System.out.println("Não tem projectos para enviar mensagens!");
                                             break;
                                         }else{
                                             for (int i = 0; i < aux.size(); i++){
@@ -483,7 +484,7 @@ public class ClienteMenu {
                                                 }
                                             }
                                         }else {
-                                            System.out.println("Nao tem mensagens na caixa de entrada.");
+                                            System.out.println("Nao tem mensagens na caixa de entrada!");
                                             break;
                                         }
 
@@ -526,7 +527,7 @@ public class ClienteMenu {
                                     }
 
                                     if(mensagemsAux.size() == 0){
-                                        System.out.println("Nao tem mensagens na caixa de entrada.");
+                                        System.out.println("Nao tem mensagens na caixa de entrada!");
                                         break;
                                     }else{
                                         for (int i = 0; i< mensagemsAux.size(); i++){
@@ -661,6 +662,12 @@ public class ClienteMenu {
 
                                     break;
                                 }
+                                case 0:
+                                {login = false;}
+                                    break;
+                                default:{
+                                    System.out.println("Input incorreto, tente novamente");
+                                }
 
                             }
 
@@ -692,6 +699,10 @@ public class ClienteMenu {
                         System.out.println("Username já usado! por favor escolha outro...");
                     }
                     break;
+                }
+                case 0:
+                {
+                    System.exit(0);
                 }
 
             }
