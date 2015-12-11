@@ -19,9 +19,9 @@ public class Main {
         int saldo = 0;
         String detalhes = "";
         int numero_thread = 0;
-
-        //TODO Carregar configuracoes de ficheiro
-        int port = 6000;
+        
+        Informations informations = new Informations();
+        int port = informations.getSocket_port();
         try{
             //Esta vai ser a nossa interface!
             DataBase dataBase = new DataBase();
@@ -39,52 +39,6 @@ public class Main {
             e.printStackTrace();
         }
 
-        //Registar Cliente
-        //dataBase.registarConta("Jorjao", "jorgearauj", "12345", 10000);
-
-        //Login
-        //login = dataBase.login("ruipedrodias", "12345");
-
-        //Get id_Cliente
-        //id_Cliente = dataBase.getIdCliente("jorgearauj");
-        //System.out.println(id_Cliente);
-
-        //Listar os projectos, temos de ter uma variavel para o estado  activo --- 1 inactivo -- 0;
-        //projectos = dataBase.listarProjectos(0);
-        /*for (int i = 0; i< projectos.size();i++){
-            System.out.println(projectos.get(i));
-
-        }*/
-
-        //Consultar saldo
-        //saldo = dataBase.consultarSaldoProjecto(5);
-        //System.out.print(saldo);
-
-        //Criar projecto
-        //dataBase.criarProjecto("Segundo","Isto é um segundo teste", "2015-11-27", id_Cliente, 10000);
-
-        /*String a = "2015-11-27";
-        String b = "2015-11-28";
-
-        DateFormat format = new SimpleDateFormat("yyyy-mm-dd");
-        Date date1 = format.parse(a);
-        Date date2 = format.parse(b);
-
-        if (date2.before(date1)){
-            System.out.println("A data dois e mais velha que a um");
-        }*/
-
-        //detalhes = dataBase.listarDetalhes_Projecto(4);
-        //System.out.println(detalhes);
-
-        //Fazer doacao
-        //dataBase.fazerDoacao(5, 10, id_Cliente);
-
-        //Cancelar projecto
-        //dataBase.cancelarProjecto(4);
-
-        //Finalizar projectos
-        //dataBase.finalizarProjectos();
     }
 }
 class Connection extends Thread

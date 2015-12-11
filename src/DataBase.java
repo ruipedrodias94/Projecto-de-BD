@@ -18,6 +18,7 @@ public class DataBase {
     Statement statement = null;
     ResultSet resultSet = null;
     PreparedStatement preparedStatement = null;
+    CallableStatement callableStatement = null;
 
     private int FALSE = 0;
     private int TRUE = 1;
@@ -85,10 +86,13 @@ public class DataBase {
     public synchronized int getIdCliente(String username) throws SQLException{
         int id = 0;
         try{
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM proj_bd.cliente WHERE user_Name = '" + username + "';");
-            while (resultSet.next()){
-                id = resultSet.getInt(1);
+            String getDBUSERByUserIdSql = "{CALL proj_bd.verId(?)}";
+            callableStatement = connection.prepareCall(getDBUSERByUserIdSql);
+            callableStatement.setString(1, username);
+            callableStatement.executeUpdate();
+            ResultSet rs = callableStatement.getResultSet();
+            while (rs.next()) {
+                id = rs.getInt(1);
             }
         }catch (SQLException e){
             e.printStackTrace();
