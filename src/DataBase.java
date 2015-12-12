@@ -842,7 +842,7 @@ public class DataBase {
         System.out.println("PROJECTO FOI CANCELADO\nSALDO DO CLIENTE FOI RESTAURADO, OBRIGADO");
         return 0;
     }
-
+    //so pró commit
     /**
      * Metodo que retorna um arraylist das doações de um certo projecto
      * @param id_Projecto

@@ -10,6 +10,7 @@ import java.util.Scanner;
 /**
  * Created by jorgearaujo on 01/12/15.
  */
+//so pró commit
 public class ClienteMenu {
     public static void main(String[] args) {
         //menu vai ser feito por aqui
