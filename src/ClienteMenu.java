@@ -744,8 +744,6 @@ class LigacaoTCP{
 
     public void send(Pedido r){
 
-
-
         try {
             OutputStream os = s.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(os);

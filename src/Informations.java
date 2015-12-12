@@ -44,7 +44,7 @@ public class Informations {
             inputStream = new FileInputStream("config.properties");
             props.load(inputStream);
 
-            this.setServer_port(Integer.parseInt(props.getProperty("socket_port")));
+            this.setSocket_port(Integer.parseInt(props.getProperty("socket_port")));
             this.setIp_servidorBD(props.getProperty("ip_servidorBD"));
             this.setPass(props.getProperty("dbpass"));
             this.setUser(props.getProperty("dbuser"));
@@ -57,10 +57,6 @@ public class Informations {
 
     public int getSocket_port() {
         return socket_port;
-    }
-
-    public void setServer_port(int socket_port) {
-        this.socket_port = socket_port;
     }
 
     public String getIp_servidorBD() {
